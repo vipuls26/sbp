@@ -4,8 +4,6 @@ namespace App\Repositories\Auth;
 
 use App\Interfaces\Auth\UserRepositoryInterface;
 use App\Models\User;
-
-
 class UserRepository implements UserRepositoryInterface
 {
     // create user in db
