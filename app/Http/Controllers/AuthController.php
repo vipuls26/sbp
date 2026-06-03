@@ -6,6 +6,7 @@ use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Models\Role;
 use App\Services\Auth\AuthService;
+use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
@@ -27,7 +28,7 @@ class AuthController extends Controller
         $this->authService->register($request->validated());
         return redirect()->route('auth.login')->with('success', 'Registration complete successfully');
     }
-    
+
     // show login form
     public function showLoginForm()
     {
@@ -46,7 +47,14 @@ class AuthController extends Controller
             ])->onlyInput('email');
         }
 
-        return redirect()->route('user.dashboard');
+        $user = Auth::user();
+        $role = $user->role->name;
+
+        if ($role === 'admin') {
+            return redirect()->route('admin.dashboard');
+        } else {
+            return redirect()->route('user.dashboard');
+        }
     }
 
     // logout
