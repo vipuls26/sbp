@@ -9,12 +9,14 @@ class UserRepository implements UserRepositoryInterface
     // create user in db
     public function create(array $data)
     {
-        return User::create([
+        $user = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => $data['password'],
             'role_id' => $data['role'],
         ]);
+
+        return $user;
     }
 
     // find user if exist in db

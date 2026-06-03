@@ -2,9 +2,12 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\PlanController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
+
+// auth routes
 
 // login
 Route::get('/', [AuthController::class, 'showLoginForm'])->name('auth.login');
@@ -15,15 +18,33 @@ Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('auth
 Route::post('/register-user', [AuthController::class, 'register'])->name('auth.create');
 
 // logout
-Route::get('/logout', [AuthController::class, 'logout'])->name('auth.logout');
+Route::post('/logout', [AuthController::class, 'logout'])->name('auth.logout');
 
 
-// user route
+
+// user routes
 Route::prefix('/user')->middleware('role:user')->group(function () {
     Route::get('/dashboard', [UserController::class, 'index'])->name('user.dashboard');
 });
 
-
+// admin routes
 Route::prefix('/admin')->middleware('role:admin')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
+});
+
+
+// plan routes
+Route::prefix('/plan')->group(function () {
+    // all plans
+    Route::get('/all-plans', [PlanController::class, 'index'])->name('plans.index');
+
+    // add plan
+    Route::get('/add-plan', [PlanController::class, 'add'])->name('plan.add');
+    Route::post('/add-plan', [PlanController::class, 'store'])->name('plan.store');
+
+    // update plan
+    Route::get('/{plan}/update-plan', [PlanController::class, 'edit'])->name('plan.edit');
+    Route::post('/{plan}/update-plan', [PlanController::class, 'update'])->name('plan.update');
+
+    Route::post('/{plan}/delete', [PlanController::class, 'destroy'])->name('plan.destroy');
 });

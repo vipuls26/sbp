@@ -14,6 +14,7 @@
 </head>
 
 <body>
+    
 
     @if (session('success'))
         <div class="fixed top-4 right-4 z-50 flex max-w-sm mb-4 rounded bg-green-100 p-3 text-green-700 alert">
@@ -32,6 +33,8 @@
             });
         }, 1500);
     </script>
+
+    @stack('scripts')
 </body>
 
 </html>
