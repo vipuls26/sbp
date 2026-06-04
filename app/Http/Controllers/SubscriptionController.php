@@ -3,19 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Plan;
-use App\Models\Subscription;
 use App\Services\Subscription\SubscriptionService;
+use Illuminate\Support\Facades\Auth;
 
 class SubscriptionController extends Controller
 {
     public function __construct(private SubscriptionService $subscriptionService) {}
-
-    // show subscription
-    public function index()
-    {
-        $subscriptions = Subscription::userSubscription()->get();
-        return view('subscription.index', compact('subscriptions'));
-    }
 
     // add subscription
     public function storeSubscription(Plan $plan)
@@ -25,9 +18,16 @@ class SubscriptionController extends Controller
     }
 
     // update subscription
-    public function update(int $id, Subscription $subscription)
+    public function update(int $id)
     {
-        $this->subscriptionService->update($id, $subscription);
-        return redirect()->route('user.dashboard')->with('success', 'Subscription Updated Successfully');
+        $this->subscriptionService->update(Auth::user()->id, $id);
+        return redirect()->route('user.plans')->with('success', 'Subscription Updated Successfully');
+    }
+
+    // cancel subscription
+    public function cancel()
+    {
+        $this->subscriptionService->cancel(Auth::user()->id);
+        return redirect()->route('user.plans')->with('success', 'Subscription Canceled Successfully');
     }
 }

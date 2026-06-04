@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('subscriptions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('plan_id')->constrained('plans')->cascadeOnDelete();
-            $table->foreignId('subscriber_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignId('subscriber_id')->unique()->constrained('users')->cascadeOnDelete();
             $table->string('status')->default('active');
             $table->timestamp('start_date')->nullable();
             $table->timestamp('end_date')->nullable();

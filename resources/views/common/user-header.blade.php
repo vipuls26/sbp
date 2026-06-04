@@ -13,7 +13,7 @@
             <div class="hidden md:flex items-center space-x-6">
 
                 <a class="text-white hover:text-red-500" href="{{ route('user.plans') }}"> Pricing </a>
-                <a class="text-white hover:text-red-500" href="{{ route('subscription.index') }}"> Subscriptions </a>
+
             </div>
 
 
@@ -40,7 +40,7 @@
             <div class="flex flex-col space-y-3">
 
                 <a class="text-white hover:text-red-500" href="{{ route('user.plans') }}"> Pricing </a>
-                <a class="text-white hover:text-red-500" href="{{ route('subscription.index') }}"> Subscriptions </a>
+              
 
                 <form action="{{ route('auth.logout') }}" method="POST">
                     @csrf
