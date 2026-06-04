@@ -13,15 +13,13 @@ return new class extends Migration
     {
         Schema::create('plans', function (Blueprint $table) {
             $table->id();
-            $table->string('name', 50);
+            $table->string('name', 50)->unique();
             $table->text('description')->nullable();
-            $table->decimal('pricing', 10,2);
-            $table->enum('duration',['monthly','annual']);
+            $table->decimal('pricing', 10, 2);
+            $table->enum('duration', ['monthly', 'annual']);
             $table->boolean('is_active')->default(true);
             $table->foreignId('admin_id')->constrained('users')->cascadeOnDelete();
             $table->timestamps();
-
-            $table->unique(['id','name']);
         });
     }
 

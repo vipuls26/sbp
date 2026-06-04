@@ -4,6 +4,7 @@ namespace App\Http\Requests\Plan;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class PlanUpdate extends FormRequest
 {
@@ -23,10 +24,35 @@ class PlanUpdate extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255'],
-            'description' => ['required', 'string'],
-            'pricing' => ['required', 'numeric', 'min:0'],
-            'duration' => ['required', 'in:monthly,annual'],
+            'name' => [
+                'required',
+                'string',
+                'max:50',
+                Rule::unique('plans', 'name')
+                    ->ignore($this->route('plan'))
+            ],
+
+            'description' => [
+                'nullable',
+                'string'
+            ],
+
+            'pricing' => [
+                'required',
+                'numeric',
+                'min:0'
+            ],
+
+            'duration' => [
+                'required',
+                'in:monthly,annual'
+            ],
+
+            'is_active' => [
+                'required',
+                'boolean'
+            ],
+
         ];
     }
 

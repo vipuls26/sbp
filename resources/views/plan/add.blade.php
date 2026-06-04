@@ -42,7 +42,7 @@
                 <div class="mt-2">
                     <div class="relative w-full">
                         <i class="pi pi-info-circle absolute p-3 text-gray-400"></i>
-                        <textarea id="description" name="description" rows="4"
+                        <textarea id="description" name="description" rows="4" placeholder="Enter description about plan"
                             class="block w-full rounded-md bg-white
                                         pl-10 pr-3 py-1.5 text-base
                                         text-gray-900 outline-1 -outline-offset-1 outline-slate-200

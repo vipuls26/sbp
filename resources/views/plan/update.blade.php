@@ -41,7 +41,7 @@
                 <div class="mt-2">
                     <div class="relative w-full">
                         <i class="pi pi-info-circle absolute p-3 text-gray-400"></i>
-                        <textarea id="description" name="description" rows="4"
+                        <textarea id="description" name="description" rows="4" placeholder="Enter description about plan"
                             class="block w-full rounded-md bg-white
                                         pl-10 pr-3 py-1.5 text-base
                                         text-gray-900 outline-1 -outline-offset-1 outline-slate-200
@@ -63,8 +63,8 @@
                 <div class="mt-2">
                     <div class="relative w-full">
                         <i class="pi pi-indian-rupee absolute p-3 text-gray-400"></i>
-                        <input id="pricing" type="number" min="0" name="pricing" value="{{ old('pricing', $plan->pricing) }}"
-                            placeholder="Enter Plan Price"
+                        <input id="pricing" type="number" min="0" name="pricing"
+                            value="{{ old('pricing', $plan->pricing) }}" placeholder="Enter Plan Price"
                             class="block w-full rounded-md bg-white
                                         pl-10 pr-3 py-1.5 text-base
                                         text-gray-900 outline-1 -outline-offset-1 outline-slate-200
@@ -96,7 +96,8 @@
                                         focus:outline-slate-700 sm:text-sm/6">
 
 
-                            <option value="monthly" {{ old('duration', $plan->duration) == 'monthly' ? 'selected' : '' }}>
+                            <option value="monthly"
+                                {{ old('duration', $plan->duration) == 'monthly' ? 'selected' : '' }}>
                                 Monthly
                             </option>
 

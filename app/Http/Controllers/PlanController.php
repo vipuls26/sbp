@@ -43,7 +43,6 @@ class PlanController extends Controller
     public function destroy(Plan $plan)
     {
         $this->planService->destroy($plan->id);
-
         return redirect()->route('plans.index')->with('success', 'Plan deleted successfully');
     }
 }
