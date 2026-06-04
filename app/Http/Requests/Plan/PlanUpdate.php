@@ -46,12 +46,7 @@ class PlanUpdate extends FormRequest
             'duration' => [
                 'required',
                 'in:monthly,annual'
-            ],
-
-            'is_active' => [
-                'required',
-                'boolean'
-            ],
+            ]
 
         ];
     }

@@ -5,9 +5,8 @@
 
             <!-- Logo -->
             <div>
-                <a href="{{ route('admin.dashboard') }}"
-                    class="text-xl font-bold text-red-500">
-                    Admin Dashboard
+                <a href="{{ route('admin.dashboard') }}" class="text-xl font-bold text-red-500 pl-3">
+                    Dashboard
                 </a>
             </div>
 
@@ -16,37 +15,35 @@
 
 
 
-                <a href="{{ route('plans.index') }}"
-                    class="text-white hover:text-red-500">
+                <a href="{{ route('plans.index') }}" class="text-white hover:text-red-500">
                     Plans
                 </a>
 
+            </nav>
+
+            <div class="flex pr-3">
                 <form action="{{ route('auth.logout') }}" method="POST">
                     @csrf
-                    <button type="submit"
-                        class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md">
+                    <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md">
                         Logout
                     </button>
                 </form>
 
-            </nav>
+            </div>
 
-         {{-- mobile view --}}
-            <button id="menuBtn"
-                class="md:hidden text-white text-2xl">
-               <i class="pi pi-align-justify"></i>
+            {{-- mobile view --}}
+            <button id="menuBtn" class="md:hidden text-white text-2xl pr-3">
+                <i class="pi pi-align-justify"></i>
             </button>
 
         </div>
 
 
-        <div id="mobileMenu"
-            class="hidden md:hidden border-t border-gray-800 py-4">
+        <div id="mobileMenu" class="hidden md:hidden border-t border-gray-800 py-4">
 
             <div class="flex flex-col space-y-3">
 
-                <a href="{{ route('plans.index') }}"
-                    class="text-white hover:text-red-500">
+                <a href="{{ route('plans.index') }}" class="text-white hover:text-red-500">
                     Plans
                 </a>
 
@@ -66,9 +63,9 @@
 </header>
 
 @push('scripts')
-<script>
-    document.getElementById('menuBtn').addEventListener('click', function () {
-        document.getElementById('mobileMenu').classList.toggle('hidden');
-    });
-</script>
+    <script>
+        document.getElementById('menuBtn').addEventListener('click', function() {
+            document.getElementById('mobileMenu').classList.toggle('hidden');
+        });
+    </script>
 @endpush
