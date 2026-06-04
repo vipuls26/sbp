@@ -23,12 +23,42 @@
                             </div>
                         </div>
 
-                        <form action="{{ route('Subscription.storeSubscription', $plan) }}" method="POST">
-                            <button
-                                class="w-full mt-6 bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200 shadow-md shadow-red-600/20">
-                                Choose Plan
-                            </button>
-                        </form>
+                        @if (!$subscription)
+                            <form action="{{ route('subscription.storeSubscription', $plan) }}" method="POST">
+                                @csrf
+                                <button
+                                    class="w-full mt-6 bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200 shadow-md shadow-red-600/20">
+                                    Choose Plan
+                                </button>
+                            </form>
+                        @elseif ($plan->id != $subscription->plan_id)
+                            <form action="{{ route('subscription.update', $plan->id) }}" method="POST">
+                                @csrf
+                                @method('PUT')
+                                <button
+                                    class="w-full mt-6 bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200 shadow-md shadow-red-600/20">
+                                    upgrade plan
+                                </button>
+
+                            </form>
+                        @else
+                            <div class="gap-2">
+                                <button
+                                    class="w-full mt-6 bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md">
+                                    Current Plan
+                                </button>
+
+                                <form action="{{ route('subscription.cancel') }}" method="POST">
+                                    @csrf
+                                    <button
+                                        class="w-full mt-6 bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md">
+                                        Cancel Plan
+                                    </button>
+
+                                </form>
+                            </div>
+                        @endif
+
                     </div>
                 @endforeach
             @else
@@ -40,7 +70,6 @@
             @endif
         </div>
     </div>
-
 
     <x-footer />
 

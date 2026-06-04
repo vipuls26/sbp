@@ -26,10 +26,11 @@ class Subscription extends Model
 
     // logged-in use subscription
     #[Scope]
-    protected function userSubscription(Builder $query): void
+    protected function activeSubscription(Builder $query): void
     {
         $query->whereHas('user', function ($query) {
             $query->where('subscriber_id', Auth::user()->id);
         });
     }
+
 }

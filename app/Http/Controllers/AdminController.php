@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Subscription;
 use App\Models\User;
 use App\Services\Admin\AdminService;
 
@@ -21,5 +22,12 @@ class AdminController extends Controller
     {
         $this->adminService->block($user->id);
         return redirect()->route('admin.dashboard')->with('success', 'User Block Successfully');
+    }
+
+    // subscriber
+    public function subscriber()
+    {
+        $subscriber = Subscription::with(['plan','user'])->get();
+        return view('admin.subscriber', compact('subscriber'));
     }
 }

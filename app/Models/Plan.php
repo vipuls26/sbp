@@ -30,8 +30,17 @@ class Plan extends Model
     #[Scope]
     protected function notSubscribed(Builder $query): void
     {
-        $query->whereDoesntHave('subscriptions', function($query){
+        $query->whereDoesntHave('subscriptions', function ($query) {
             $query->where('subscriber_id', Auth::user()->id);
+        });
+    }
+
+    // active plan of user
+    #[Scope]
+    protected function activeSubscription(Builder $query): void
+    {
+        $query->whereHas('subscriptions', function ($query) {
+            $query->where('end_date', '>', now());
         });
     }
 }

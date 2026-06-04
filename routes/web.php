@@ -39,6 +39,9 @@ Route::prefix('/admin')->middleware('role:admin')->group(function () {
 
     // block user
     Route::post('/{user}/block-user', [AdminController::class, 'block'])->name('admin.block');
+
+    // subscriber
+    Route::get('/subscriber', [AdminController::class, 'subscriber'])->name('admin.subscriber');
 });
 
 
@@ -61,7 +64,13 @@ Route::prefix('/plan')->middleware('role:admin')->group(function () {
 
 // subscription route
 Route::prefix('/subscription')->middleware('role:user')->group(function () {
-    // subscription route
+    // add subscription
     Route::get('/subscription', [SubscriptionController::class, 'index'])->name('subscription.index');
-    Route::post('/{plan}/store-subscription', [SubscriptionController::class, 'storeSubscription'])->name('Subscription.storeSubscription');
+    Route::post('/{plan}/store-subscription', [SubscriptionController::class, 'storeSubscription'])->name('subscription.storeSubscription');
+
+    // update subscription
+    Route::put('/{plan}/update-subscription', [SubscriptionController::class, 'update'])->name('subscription.update');
+
+    // cancel subscription
+    Route::post('/cancel-subscription', [SubscriptionController::class, 'cancel'])->name('subscription.cancel');
 });
