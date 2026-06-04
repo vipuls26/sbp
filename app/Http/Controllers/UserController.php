@@ -14,7 +14,7 @@ class UserController extends Controller
     // show pricing page
     public function show()
     {
-        $plans = Plan::where('is_active', 1)->get();
+        $plans = Plan::notSubscribed()->get();
         return view('user.plans', compact('plans'));
     }
 

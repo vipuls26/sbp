@@ -21,7 +21,7 @@ class SubscriptionController extends Controller
     public function storeSubscription(Plan $plan)
     {
         $this->subscriptionService->create($plan);
-        return redirect()->route('user.dashboard')->with('success', 'Plan Subscribed Successfully');
+        return redirect()->route('user.plans')->with('success', 'Plan Subscribed Successfully');
     }
 
     // update subscription
