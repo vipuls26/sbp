@@ -29,7 +29,11 @@ Route::prefix('/user')->middleware('role:user')->group(function () {
 
 // admin routes
 Route::prefix('/admin')->middleware('role:admin')->group(function () {
+    // dashboard route
     Route::get('/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
+
+    // block user
+    Route::post('/{user}/block-user', [AdminController::class, 'block'])->name('admin.block');
 });
 
 

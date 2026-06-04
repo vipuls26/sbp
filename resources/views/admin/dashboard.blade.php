@@ -33,10 +33,10 @@
                             </td>
 
                             <td class="px-4 py-3">
-                                <div class="flex justify-center gap-2">
+                                <div class="gap-2">
 
                                     @if ($user->role->name != 'admin')
-                                        <form action="#" method="POST">
+                                        <form action="{{ route('admin.block', $user) }}" method="POST">
                                             @csrf
 
                                             <button type="submit" onclick="return confirm('Delete this plan?')"

@@ -4,7 +4,6 @@ namespace App\Services\Plan;
 
 use App\Interfaces\Plan\PlanRepositoryInterface;
 
-
 class PlanService
 {
     public function __construct(

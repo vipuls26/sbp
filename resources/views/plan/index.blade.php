@@ -67,9 +67,7 @@
                     @empty
                         <tr>
                             <td colspan="6" class="text-center py-6 text-gray-500">
-                                <p> No plans found.
-                                    <a href="{{ route('plan.add') }}"> Add </a> now
-                                </p>
+                                <p> No plans found. </p>
                             </td>
                         </tr>
                     @endforelse

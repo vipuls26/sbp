@@ -23,10 +23,11 @@ class PlanAdd extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255'],
-            'description' => ['required', 'string'],
+            'name' => ['required', 'string', 'max:50', 'unique:plans,name'],
+            'description' => ['nullable', 'string'],
             'pricing' => ['required', 'numeric', 'min:0'],
             'duration' => ['required', 'in:monthly,annual'],
+            'is_active' => ['sometimes', 'boolean'],
         ];
     }
 
@@ -37,9 +38,13 @@ class PlanAdd extends FormRequest
             'name.required' => 'Plan name is required',
             'name.string' => 'Plan name must be a string',
             'name.max' => 'Plan name may not be greater than 255 characters',
+            'name.unique' => 'Plan name already exists',
 
             // plan description
             'description.required' => 'Plan description is required',
+            'description.string' => 'Plan description must be a string',
+
+            // plan pricing
             'pricing.required' => 'Plan pricing is required',
             'pricing.numeric' => 'Plan pricing must be a number',
             'pricing.min' => 'Plan pricing must be a positive value',

@@ -7,13 +7,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
-
+use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Builder;
-
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[Fillable(['name', 'email', 'password','role_id'])]
 #[Hidden(['password', 'remember_token'])]
@@ -21,7 +21,7 @@ use Illuminate\Database\Eloquent\Builder;
 class User extends Authenticatable
 {
 
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, SoftDeletes;
     protected function casts(): array
     {
         return [
@@ -47,13 +47,13 @@ class User extends Authenticatable
         return $this->hasMany(Subscription::class, 'subscriber_id');
     }
 
-
-
-    // scopedBy
-     #[Scope]
-    protected function notAdmin(Builder $query):void
+    // only user with user role
+    #[Scope]
+    protected function userOnly(Builder $query): void
     {
-        $query->where('name', 'admin');
+        $query->whereHas('role', function ($query) {
+            $query->where('name','user');
+        });
     }
 
 
