@@ -37,7 +37,7 @@ class PlanController extends Controller
     public function update(PlanUpdate $request, Plan $plan)
     {
         $this->planService->update($plan->id ,$request->validated());
-        return redirect()->route('plans.index')->with('success', 'Plan ypdated successfully');
+        return redirect()->route('plans.index')->with('success', 'Plan Updated successfully');
     }
 
     public function destroy(Plan $plan)

@@ -3,6 +3,7 @@
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PlanController;
+use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -24,7 +25,11 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('auth.logout');
 
 // user routes
 Route::prefix('/user')->middleware('role:user')->group(function () {
+    // dashboard
     Route::get('/dashboard', [UserController::class, 'index'])->name('user.dashboard');
+
+    // pricing route
+    Route::get('/plans', [UserController::class, 'show'])->name('user.plans');
 });
 
 // admin routes
@@ -38,7 +43,7 @@ Route::prefix('/admin')->middleware('role:admin')->group(function () {
 
 
 // plan routes
-Route::prefix('/plan')->group(function () {
+Route::prefix('/plan')->middleware('role:admin')->group(function () {
     // all plans
     Route::get('/all-plans', [PlanController::class, 'index'])->name('plans.index');
 
@@ -47,8 +52,16 @@ Route::prefix('/plan')->group(function () {
     Route::post('/add-plan', [PlanController::class, 'store'])->name('plan.store');
 
     // update plan
-    Route::get('/{plan}/update-plan', [PlanController::class, 'edit'])->name('plan.edit');
+    Route::get('/{plan}/plan', [PlanController::class, 'edit'])->name('plan.edit');
     Route::post('/{plan}/update-plan', [PlanController::class, 'update'])->name('plan.update');
 
     Route::post('/{plan}/delete', [PlanController::class, 'destroy'])->name('plan.destroy');
+});
+
+
+// subscription route
+Route::prefix('/subscription')->middleware('role:user')->group(function () {
+    // subscription route
+    Route::get('/subscription', [SubscriptionController::class, 'index'])->name('subscription.index');
+    Route::post('/{plan}/store-subscription', [SubscriptionController::class, 'storeSubscription'])->name('Subscription.storeSubscription');
 });

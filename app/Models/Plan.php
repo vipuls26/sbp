@@ -3,8 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
 
 #[Fillable(['name', 'description', 'pricing', 'duration', 'admin_id'])]
 class Plan extends Model
@@ -21,5 +24,14 @@ class Plan extends Model
     public function subscriptions()
     {
         return $this->hasMany(Subscription::class);
+    }
+
+    // plan not subscib by user
+    #[Scope]
+    protected function notSubscribed(Builder $query): void
+    {
+        $query->whereDoesntHave('subscriptions', function($query){
+            $query->where('subscriber_id', Auth::user()->id);
+        });
     }
 }

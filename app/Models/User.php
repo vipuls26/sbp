@@ -15,7 +15,7 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-#[Fillable(['name', 'email', 'password','role_id'])]
+#[Fillable(['name', 'email', 'password', 'role_id'])]
 #[Hidden(['password', 'remember_token'])]
 // #[ScopedBy([NotAdminUser::class])]
 class User extends Authenticatable
@@ -52,9 +52,8 @@ class User extends Authenticatable
     protected function userOnly(Builder $query): void
     {
         $query->whereHas('role', function ($query) {
-            $query->where('name','user');
+            $query->where('name', 'user');
         });
     }
-
 
 }
