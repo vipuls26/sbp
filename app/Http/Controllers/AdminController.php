@@ -27,7 +27,7 @@ class AdminController extends Controller
     // subscriber
     public function subscriber()
     {
-        $subscriber = Subscription::with(['plan','user'])->get();
-        return view('admin.subscriber', compact('subscriber'));
+        $subscribers = Subscription::with('plan','user')->get();
+        return view('admin.subscriber', compact('subscribers'));
     }
 }

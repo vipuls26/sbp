@@ -19,6 +19,10 @@
                     Plans
                 </a>
 
+                <a href="{{ route('admin.subscriber') }}" class="text-white hover:text-red-500">
+                    Subscriber
+                </a>
+
             </nav>
 
             <div class="flex pr-3">
