@@ -2,10 +2,10 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PlanController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\UserController;
-use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
 
@@ -73,4 +73,13 @@ Route::prefix('/subscription')->middleware('role:user')->group(function () {
     Route::put('/{plan}/update-subscription', [SubscriptionController::class, 'update'])->name('subscription.update');
     // cancel subscription
     Route::post('/cancel-subscription', [SubscriptionController::class, 'cancel'])->name('subscription.cancel');
+});
+
+
+Route::prefix('/payment')->middleware('role:user')->group(function () {
+    // show payment page
+    Route::get('/page/{plan}', [PaymentController::class, 'showPaymentPage'])->name('payment.page');
+
+    // add payment
+    Route::post('/make-payment/{plan}', [PaymentController::class, 'makePayment'])->name('payment.makePayment');
 });
