@@ -22,25 +22,25 @@
                     <tbody>
                         @foreach ($subscribers as $subscriber)
                             <tr class="border-b hover:bg-gray-50">
-                                <td class="px-4 py-3 font-medium"> {{ optional($subscriber->user)->name ?? 'N/A' }}
+                                <td class="px-4 py-3 font-medium"> {{ $subscriber->user?->name  }}
                                 </td>
-                                <td class="px-4 py-3"> {{ $subscriber->user->email }} </td>
-                                <td class="px-4 py-3"> {{ $subscriber->plan->name }} </td>
-                                <td class="px-4 py-3"> {{ $subscriber->plan->description }} </td>
-                                <td class="px-4 py-3"> {{ $subscriber->plan->pricing  }} </td>
-                                <td class="px-4 py-3"> {{ $subscriber->plan->duration }} </td>
+                                <td class="px-4 py-3"> {{ $subscriber->user?->email }} </td>
+                                <td class="px-4 py-3"> {{ $subscriber->plan?->name }}  </td>
+                                <td class="px-4 py-3"> {{ $subscriber->plan?->description }} </td>
+                                <td class="px-4 py-3"> ₹ {{ $subscriber->plan?->pricing  }} </td>
+                                <td class="px-4 py-3"> {{ $subscriber->plan?->duration }} </td>
                                 <td class="px-4 py-3"> {{ $subscriber->start_date }} </td>
                                 <td class="px-4 py-3"> {{ $subscriber->end_date }} </td>
 
 
                                 @if ($subscriber->end_date > now())
-                                    <td class="px-4 py-3 font-semibold">
-                                        <span class="bg-green-600 p-2 rounded-2xl text-white"> Active Plan
+                                    <td class="px-4 py-3">
+                                        <span class="bg-green-600 p-2 rounded-2xl text-white"> Active
                                         </span>
                                     </td>
                                 @else
                                     <td class="px-4 py-3 font-semibold">
-                                        <span class="bg-red-500 p-2 rounded-2xl text-white"> Plan Expired
+                                        <span class="bg-red-500 p-2 rounded-2xl text-white"> Expired
                                         </span>
                                     </td>
                                 @endif

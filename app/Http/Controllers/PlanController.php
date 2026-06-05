@@ -14,7 +14,7 @@ class PlanController extends Controller
 
     public function index()
     {
-        $plans = Plan::where('is_active', 1)->get();
+        $plans = Plan::withCount('subscriptions')->get();
         return view('plan.index', compact('plans'));
     }
 
@@ -42,7 +42,12 @@ class PlanController extends Controller
 
     public function destroy(Plan $plan)
     {
-        $this->planService->destroy($plan->id);
-        return redirect()->route('plans.index')->with('success', 'Plan deleted successfully');
+        $result = $this->planService->toggleStatus($plan->id);
+
+        if (! $result['success']) {
+            return redirect()->route('plans.index')->with('error', $result['message']);
+        }
+
+        return redirect()->route('plans.index')->with('success', $result['message']);
     }
 }

@@ -6,4 +6,7 @@ interface AdminRepositoryInterface
 {
     // block user
     public function block(int $id);
+
+    // unblock user
+    public function unblock(int $id);
 }

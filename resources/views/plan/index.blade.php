@@ -14,6 +14,7 @@
                         <th class="px-4 py-3 text-left">Plan Name</th>
                         <th class="px-4 py-3 text-left">Description</th>
                         <th class="px-4 py-3 text-left">Price</th>
+                        <th class="px-4 py-3 text-left">Status</th>
                         <th class="px-4 py-3 text-left">Duration</th>
                         <th class="px-4 py-3 text-center">Actions</th>
                     </tr>
@@ -32,7 +33,21 @@
                             </td>
 
                             <td class="px-4 py-3">
-                                ₹{{ $plan->pricing }}
+                                ₹ {{ $plan->pricing }}
+                            </td>
+
+                            <td class="px-4 py-3">
+                                @if ($plan->is_active == 'true')
+                                    <span
+                                        class="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">
+                                        Active
+                                    </span>
+                                @else
+                                    <span
+                                        class="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-700">
+                                        Inactive
+                                    </span>
+                                @endif
                             </td>
 
                             <td class="px-4 py-3">
@@ -54,10 +69,19 @@
                                     <form action="{{ route('plan.destroy', $plan) }}" method="POST">
                                         @csrf
 
-                                        <button type="submit" onclick="return confirm('Delete this plan?')"
-                                            class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded">
-                                            Delete
-                                        </button>
+                                        @if ($plan->is_active == 'true')
+                                            <button type="submit"
+                                                onclick="return confirm('Want to deactivate this plan?')"
+                                                class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded">
+                                                Deactivate Plan
+                                            </button>
+                                        @else
+                                            <button type="submit"
+                                                onclick="return confirm('Want to activate this plan?')"
+                                                class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded">
+                                                Activate Plan
+                                            </button>
+                                        @endif
                                     </form>
 
                                 </div>

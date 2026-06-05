@@ -2,67 +2,47 @@
 
     <x-header />
 
-    <div class="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8">
+    <div class="min-h-full bg-slate-50 px-6 py-12 lg:px-8">
+        <div class="mx-auto max-w-7xl space-y-8">
 
-        <div class="overflow-x-auto rounded-lg shadow-md">
-            <table class="min-w-full bg-white border border-gray-200">
 
-                <thead class="bg-black text-white">
-                    <tr>
-                        <th class="px-4 py-3 text-left">Name</th>
-                        <th class="px-4 py-3 text-left">Email</th>
-                        <th class="px-4 py-3 text-left">Role</th>
-                        <th class="px-4 py-3 text-left">Action</th>
-                    </tr>
-                </thead>
+            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-5">
+                <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+                    <p class="text-sm font-medium text-slate-500">Total Users</p>
+                    <p class="mt-3 text-3xl font-bold text-slate-900">{{ $users }}</p>
 
-                <tbody>
-                    @forelse ($users as $user)
-                        <tr class="border-b hover:bg-gray-50">
+                </div>
 
-                            <td class="px-4 py-3 font-medium">
-                                {{ $user->name }}
-                            </td>
+                <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+                    <p class="text-sm font-medium text-slate-500">Blocked Users</p>
+                    <p class="mt-3 text-3xl font-bold text-slate-900">{{ $blockedUsers }}</p>
 
-                            <td class="px-4 py-3">
-                                {{ $user->email }}
-                            </td>
+                </div>
 
-                            <td class="px-4 py-3">
-                                {{ $user->role->name }}
-                            </td>
+                <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+                    <p class="text-sm font-medium text-slate-500">Total Plans</p>
+                    <p class="mt-3 text-3xl font-bold text-slate-900">{{ $plans }}</p>
 
-                            <td class="px-4 py-3">
-                                <div class="gap-2">
+                </div>
 
-                                    @if ($user->role->name != 'admin')
-                                        <form action="{{ route('admin.block', $user) }}" method="POST">
-                                            @csrf
+                <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+                    <p class="text-sm font-medium text-slate-500">Total Subscriptions</p>
+                    <p class="mt-3 text-3xl font-bold text-slate-900">{{ $subscriptions->count() }}</p>
 
-                                            <button type="submit" onclick="return confirm('Delete this plan?')"
-                                                class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded">
-                                                Block
-                                            </button>
-                                        </form>
-                                    @endif
+                </div>
 
-                                </div>
-                            </td>
+                <div class="rounded-2xl bg-slate-900 p-6 shadow-sm ring-1 ring-slate-800">
+                    <p class="text-sm font-medium text-slate-300">Total Earning</p>
+                    <p class="mt-3 text-3xl font-bold text-white">₹{{ $totalEarning }}</p>
 
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="6" class="text-center py-6 text-gray-500">
-                                <p> No user found.
+                </div>
+            </div>
 
-                                </p>
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
+        
 
-            </table>
         </div>
     </div>
+
     <x-footer />
+
 </x-layout>

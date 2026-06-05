@@ -22,6 +22,12 @@
         </div>
     @endif
 
+    @if (session('error'))
+        <div class="fixed top-4 right-4 z-50 flex max-w-sm mb-4 rounded bg-red-100 p-3 text-red-700 alert">
+            <span>{{ session('error') }}</span>
+        </div>
+    @endif
+
     {{ $slot }}
     <script src="https://cdn.jsdelivr.net/npm/@tailwindplus/elements@1" type="module"></script>
 

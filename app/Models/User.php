@@ -44,7 +44,7 @@ class User extends Authenticatable
     // user has many subcription
     public function subscriptions()
     {
-        return $this->hasMany(Subscription::class, 'subscriber_id');
+        return $this->hasOne(Subscription::class, 'subscriber_id');
     }
 
     // only user with user role

@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Plan;
 use App\Models\Subscription;
+use App\Models\User;
+use App\Notifications\SubscriptionNotification;
+use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
@@ -15,12 +18,19 @@ class UserController extends Controller
     // show pricing page
     public function show()
     {
-        // $plans = Plan::notSubscribed()->where('is_active', 1)->get();
-        $plans = Plan::where('is_active', 1)->get();
+        // Only show plans that are active for users.
+        $plans = Plan::where('is_active', 'true')->get();
         $subscription = Subscription::activeSubscription()->first();
 
-        // dd($plans,$subscription);
         return view('user.plans', compact('plans','subscription'));
+    }
+
+
+    // send email for subscription expire
+    public function expireSubscription()
+    {
+        $notification = Auth::user()->subscriptions->expireSubscription(3)->first();
+        
     }
 
 }

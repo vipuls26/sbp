@@ -21,6 +21,11 @@ class PlanService
         return $this->planRepositoryInterface->update($id, $data);
     }
 
+    public function toggleStatus(int $id)
+    {
+        return $this->planRepositoryInterface->toggleStatus($id);
+    }
+
     public function destroy(int $id)
     {
         return $this->planRepositoryInterface->destroy($id);
