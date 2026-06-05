@@ -8,7 +8,7 @@ use App\Models\Subscription;
 class SubscriptionRepository implements SubscriptionRepositoryInterface
 {
     // add subscription
-    public function create($data)
+    public function create(array $data)
     {
         $subscription = Subscription::create($data);
         return $subscription;

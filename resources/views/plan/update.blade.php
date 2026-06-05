@@ -2,7 +2,7 @@
 
     <x-header />
 
-    <div class="sm:mx-auto sm:w-full sm:max-w-sm">
+    <div class="sm:mx-auto sm:w-full sm:max-w-sm p-10">
         <h2 class="text-center text-2xl/9 font-bold tracking-tight text-slate-700">Update Plan</h2>
     </div>
 
