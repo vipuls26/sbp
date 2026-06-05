@@ -11,7 +11,7 @@ interface PlanRepositoryInterface
     public function update(int $id, array $data);
 
     // toggle active status
-    public function toggleStatus(int $id);
+    public function status(int $id);
 
     // delete plan
     public function destroy(int $id);

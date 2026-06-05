@@ -1,4 +1,4 @@
-<x-layout title="Admin Dashboard">
+<x-layout title="All User">
 
     <x-header />
 

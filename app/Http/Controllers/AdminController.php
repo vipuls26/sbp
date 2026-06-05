@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Plan;
-use App\Models\Subscription;
 use App\Models\User;
 use App\Services\Admin\AdminService;
 
@@ -13,19 +11,13 @@ class AdminController extends Controller
 
     public function index()
     {
-        $users = User::withTrashed()->userOnly()->count();
-        $blockedUsers = User::onlyTrashed()->userOnly()->count();
-        $subscriptions = Subscription::with('plan', 'user')->latest()->get();
-        $plans = Plan::withTrashed()->get()->count();
-
-        // total earning
-        $totalEarning = Subscription::totalEarning()->value('total_earning') ?? 0;
-
-        return view('admin.dashboard', compact('users', 'blockedUsers', 'plans', 'subscriptions', 'totalEarning'));
+         $dashboard = $this->adminService->dashboard();
+        return view('admin.dashboard', $dashboard);
     }
+
     public function allUser()
     {
-        $users = User::withTrashed()->userOnly()->get();
+        $users = $this->adminService->totalUser();
         return view('admin.users', compact('users'));
     }
 
@@ -46,7 +38,7 @@ class AdminController extends Controller
     // subscriber
     public function subscriber()
     {
-        $subscribers = Subscription::with('plan', 'user')->get();
+        $subscribers = $this->adminService->totalSubscriber();
         return view('admin.subscriber', compact('subscribers'));
     }
 }
