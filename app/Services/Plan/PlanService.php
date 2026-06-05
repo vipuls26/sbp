@@ -3,6 +3,7 @@
 namespace App\Services\Plan;
 
 use App\Interfaces\Plan\PlanRepositoryInterface;
+use App\Models\Plan;
 
 class PlanService
 {
@@ -10,22 +11,32 @@ class PlanService
         private PlanRepositoryInterface $planRepositoryInterface
     ) {}
 
+    // show plan to admin
+    public function dashboard(): array
+    {
+        return [
+            'plans' => Plan::withCount('subscriptions')->get(),
+        ];
+    }
     // create plan
     public function add(array $data)
     {
         return $this->planRepositoryInterface->create($data);
     }
 
-    public function update(int $id,array $data)
+    // update plan
+    public function update(int $id, array $data)
     {
         return $this->planRepositoryInterface->update($id, $data);
     }
 
-    public function toggleStatus(int $id)
+    // active deactice
+    public function status(int $id)
     {
-        return $this->planRepositoryInterface->toggleStatus($id);
+        return $this->planRepositoryInterface->status($id);
     }
 
+    // delete plan
     public function destroy(int $id)
     {
         return $this->planRepositoryInterface->destroy($id);

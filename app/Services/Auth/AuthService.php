@@ -2,7 +2,6 @@
 
 namespace App\Services\Auth;
 
-
 use App\Interfaces\Auth\UserRepositoryInterface;
 use Illuminate\Support\Facades\Auth;
 

@@ -1,4 +1,4 @@
-<x-layout>
+<x-layout title="Subscribers">
 
     <x-header />
 
