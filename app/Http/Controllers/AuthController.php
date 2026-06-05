@@ -18,7 +18,7 @@ class AuthController extends Controller
     public function showRegisterForm()
     {
         // get role with there id
-        $roles = Role::get(['id', 'name']);
+        $roles = $roles = Role::notAdminRole()->get();
         return view('auth.register', compact('roles'));
     }
 

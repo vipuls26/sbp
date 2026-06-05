@@ -23,25 +23,27 @@ class DatabaseSeeder extends Seeder
             'role_id' => 1
         ]);
 
-         User::factory()->create([
+        User::factory()->create([
             'name' => 'user2',
             'email' => 'user2@gmail.com',
             'password' => 'password',
             'role_id' => 1
         ]);
 
-         User::factory()->create([
+        User::factory()->create([
             'name' => 'user3',
             'email' => 'user3@gmail.com',
             'password' => 'password',
             'role_id' => 1
         ]);
 
-         User::factory()->create([
+        User::factory()->create([
             'name' => 'admin',
             'email' => 'admin@gmail.com',
             'password' => 'password',
             'role_id' => 2
         ]);
+
+        $this->call([PlanSeeder::class]);
     }
 }

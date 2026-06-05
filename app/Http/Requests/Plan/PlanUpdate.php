@@ -23,31 +23,33 @@ class PlanUpdate extends FormRequest
      */
     public function rules(): array
     {
+        $plan = $this->route('plan');
+
         return [
             'name' => [
                 'required',
                 'string',
                 'max:50',
-                Rule::unique('plans', 'name')
-                    ->ignore($this->route('plan'))
+                Rule::unique('plans')
+                    ->where(fn($query) => $query->where('duration', $this->duration))
+                    ->ignore($plan->id),
             ],
 
             'description' => [
                 'nullable',
-                'string'
+                'string',
             ],
 
             'pricing' => [
                 'required',
                 'numeric',
-                'min:0'
+                'min:0',
             ],
 
             'duration' => [
                 'required',
-                'in:monthly,annual'
-            ]
-
+                'in:monthly,annual',
+            ],
         ];
     }
 

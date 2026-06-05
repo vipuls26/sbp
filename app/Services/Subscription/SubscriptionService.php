@@ -6,6 +6,7 @@ use App\Interfaces\Subscription\SubscriptionRepositoryInterface;
 use App\Models\Plan;
 use Illuminate\Support\Facades\Auth;
 
+
 class SubscriptionService
 {
     public function __construct(
@@ -13,17 +14,24 @@ class SubscriptionService
     ) {}
 
     // create subscription
-    public function create($data)
+    public function create(Plan $plan)
     {
-        // dd($data);
-        return $this->subscriptionRepositoryInterface->create(
+        $user = Auth::user();
+        $startDate = now()->toDateTimeString();
+        $endDate = $plan->duration === 'annual'
+            ? now()->addYear()->toDateTimeString()
+            : now()->addDays(30)->toDateTimeString();
+
+        $subscription = $this->subscriptionRepositoryInterface->create(
             [
-                'plan_id' => $data['id'],
-                'subscriber_id' => Auth::user()->id,
-                'start_date' => now(),
-                'end_date' => $data['duration'] == 'annual' ? now()->addYear() : now()->addDays(30),
+                'plan_id' => $plan->id,
+                'subscriber_id' => $user->id,
+                'start_date' => $startDate,
+                'end_date' => $endDate,
             ]
         );
+
+        return $subscription;
     }
 
     // update subscription
@@ -31,16 +39,18 @@ class SubscriptionService
     {
         $plan = Plan::findOrFail($planId);
 
-        // dd($plan->id);
-
         // update subscription data
         $data = [
             'plan_id' => $plan->id,
-            'start_date' => now(),
-            'end_date' => $plan->duration === 'annual' ? now()->addYear() : now()->addDays(30),
+            'start_date' => now()->toDateTimeString(),
+            'end_date' => $plan->duration === 'annual'
+                ? now()->addYear()->toDateTimeString()
+                : now()->addDays(30)->toDateTimeString(),
         ];
 
-        return $this->subscriptionRepositoryInterface->update($subscriberId, $data);
+        $subscription = $this->subscriptionRepositoryInterface->update($subscriberId, $data);
+
+        return $subscription;
     }
 
     // cancel subscription

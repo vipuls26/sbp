@@ -17,6 +17,12 @@ class AdminService
         return $this->adminRepository->block($id);
     }
 
+    // unblock user
+    public function unblock(int $id)
+    {
+        return $this->adminRepository->unblock($id);
+    }
+
     public function subscriber()
     {
         return Subscription::with(['plan','user'])->get();

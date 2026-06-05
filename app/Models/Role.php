@@ -5,11 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Database\Query\Builder;
+use Illuminate\Database\Eloquent\Builder;
 
-#[Fillable(['name','created_at','updated_at'])]
+#[Fillable(['name', 'created_at', 'updated_at'])]
 class Role extends Model
 {
     //
@@ -18,4 +17,10 @@ class Role extends Model
         return $this->hasOne(User::class);
     }
 
+
+    #[Scope]
+    protected function notAdminRole(Builder $query): void
+    {
+        $query->where('name' , '!=' , 'admin');
+    }
 }

@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 
-#[Fillable(['name', 'description', 'pricing', 'duration', 'admin_id'])]
+#[Fillable(['name', 'description', 'pricing', 'duration', 'is_active', 'admin_id'])]
 class Plan extends Model
 {
     use SoftDeletes;

@@ -33,4 +33,20 @@ class Subscription extends Model
         });
     }
 
+    // subscription expried
+    #[Scope]
+    protected function expireSubscription(Builder $query, int $days): Builder
+    {
+        return $query->where('end_date', '<', now()->addDays($days)->toDateString());
+    }
+
+    // total earning from all subscriptions
+    #[Scope]
+    protected function totalEarning(Builder $query): Builder
+    {
+        return $query
+            ->leftJoin('plans', 'subscriptions.plan_id', '=', 'plans.id')
+            ->selectRaw('COALESCE(SUM(plans.pricing), 0) as total_earning');
+    }
+
 }
