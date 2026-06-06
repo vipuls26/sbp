@@ -4,6 +4,6 @@ namespace App\Interfaces\Payment;
 
 interface PaymentRepositoryInterface
 {
-    // add payment
-    public function checkout(array $data);
+    // store payment data
+    public function create(array $data);
 }

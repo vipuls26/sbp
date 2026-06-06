@@ -13,7 +13,7 @@ class UserRepository implements UserRepositoryInterface
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => $data['password'],
-            'role_id' => $data['role'],
+            'role_id' => (int) $data['role'],
         ]);
 
         return $user;

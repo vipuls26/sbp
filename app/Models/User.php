@@ -41,8 +41,8 @@ class User extends Authenticatable
         return $this->hasMany(Plan::class, 'admin_id');
     }
 
-    // user has many subcription
-    public function subscriptions()
+    // user has one active subscription
+    public function subscription()
     {
         return $this->hasOne(Subscription::class, 'subscriber_id');
     }

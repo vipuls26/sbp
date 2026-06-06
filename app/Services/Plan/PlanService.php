@@ -11,34 +11,34 @@ class PlanService
         private PlanRepositoryInterface $planRepositoryInterface
     ) {}
 
-    // show plan to admin
+    // show plans to the admin dashboard
     public function dashboard(): array
     {
         return [
             'plans' => Plan::withCount('subscriptions')->get(),
         ];
     }
-    // create plan
-    public function add(array $data)
+    // create a plan
+    public function create(array $data)
     {
         return $this->planRepositoryInterface->create($data);
     }
 
-    // update plan
+    // update a plan
     public function update(int $id, array $data)
     {
         return $this->planRepositoryInterface->update($id, $data);
     }
 
-    // active deactice
-    public function status(int $id)
+    // toggle active/deactive status
+    public function toggleStatus(int $id)
     {
-        return $this->planRepositoryInterface->status($id);
+        return $this->planRepositoryInterface->toggleStatus($id);
     }
 
-    // delete plan
-    public function destroy(int $id)
+    // delete a plan
+    public function delete(int $id)
     {
-        return $this->planRepositoryInterface->destroy($id);
+        return $this->planRepositoryInterface->delete($id);
     }
 }

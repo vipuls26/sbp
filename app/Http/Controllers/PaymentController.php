@@ -16,13 +16,17 @@ class PaymentController extends Controller
         private SubscriptionService $subscriptionService
     ) {}
 
-    public function showPaymentPage(Plan $plan)
+    public function create(Plan $plan)
     {
+        abort_if($plan->is_active !== 'true', 404);
+
         return view('payment.page', compact('plan'));
     }
 
-    public function makePayment(PaymentRequest $request, Plan $plan)
+    public function store(PaymentRequest $request, Plan $plan)
     {
+        abort_if($plan->is_active !== 'true', 404);
+
         DB::transaction(function () use ($plan) {
             // store payment first
             $this->paymentService->create([

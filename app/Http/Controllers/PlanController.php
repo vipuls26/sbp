@@ -20,15 +20,15 @@ class PlanController extends Controller
     }
 
     // show add form
-    public function add()
+    public function create()
     {
         return view('plan.add');
     }
 
-    // add plan
+    // store a new plan
     public function store(PlanAdd $request)
     {
-        $this->planService->add($request->validated());
+        $this->planService->create($request->validated());
         return redirect()->route('plans.index')->with('success', 'Plan added successfully');
     }
 
@@ -45,10 +45,10 @@ class PlanController extends Controller
         return redirect()->route('plans.index')->with('success', 'Plan Updated successfully');
     }
 
-    // active deactive plan
-    public function destroy(Plan $plan)
+    // toggle active/deactive plan
+    public function toggleStatus(Plan $plan)
     {
-        $result = $this->planService->status($plan->id);
+        $result = $this->planService->toggleStatus($plan->id);
 
         if (! $result['success']) {
             return redirect()->route('plans.index')->with('error', $result['message']);

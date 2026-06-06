@@ -22,9 +22,9 @@
                     <tbody>
                         @foreach ($subscribers as $subscriber)
                             <tr class="border-b hover:bg-gray-50">
-                                <td class="px-4 py-3 font-medium"> {{ $subscriber->user?->name  }}
+                                <td class="px-4 py-3 font-medium"> {{ $subscriber->subscriber?->name  }}
                                 </td>
-                                <td class="px-4 py-3"> {{ $subscriber->user?->email }} </td>
+                                <td class="px-4 py-3"> {{ $subscriber->subscriber?->email }} </td>
                                 <td class="px-4 py-3"> {{ $subscriber->plan?->name }}  </td>
                                 <td class="px-4 py-3"> {{ $subscriber->plan?->description }} </td>
                                 <td class="px-4 py-3"> ₹ {{ $subscriber->plan?->pricing  }} </td>
@@ -54,5 +54,4 @@
         @endif
     </div>
 
-    <x-footer />
 </x-layout>

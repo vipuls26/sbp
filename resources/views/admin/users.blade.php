@@ -36,7 +36,7 @@
                                 <div class="gap-2">
 
                                     @if ($user->role->name != 'admin' && $user->deleted_at != null)
-                                        <form action="{{ route('admin.unblock', $user) }}" method="POST">
+                                        <form action="{{ route('admin.users.restore', $user) }}" method="POST">
                                             @csrf
 
                                             <button type="submit"
@@ -46,7 +46,7 @@
                                             </button>
                                         </form>
                                     @else
-                                        <form action="{{ route('admin.block', $user) }}" method="POST">
+                                        <form action="{{ route('admin.users.block', $user) }}" method="POST">
                                             @csrf
 
                                             <button type="submit"
@@ -75,5 +75,4 @@
             </table>
         </div>
     </div>
-    <x-footer />
 </x-layout>

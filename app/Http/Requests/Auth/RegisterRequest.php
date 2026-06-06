@@ -27,7 +27,7 @@ class RegisterRequest extends FormRequest
             'email'    => 'required|string|email|max:255|unique:users,email',
             'password' => 'required|string|min:6|max:12',
             'password_confirmation' => 'required|same:password',
-            'role'     => 'required|string',
+            'role'     => 'required|integer|exists:roles,id',
         ];
     }
 
@@ -36,20 +36,20 @@ class RegisterRequest extends FormRequest
         return [
             // name
             'name.required' => 'Name is required',
-            'name.string' => 'Name must be in string',
+            'name.string' => 'Name must be a string',
             'name.min' => 'Name must be at least 2 characters',
             'name.max' => 'Name must be at most 30 characters',
 
             // email
             'email.required' => 'Email is required',
-            'email.string' => 'Email must be in string',
+            'email.string' => 'Email must be a string',
             'email.email' => 'Email must be a valid email address',
             'email.max' => 'Email must be at most 255 characters',
             'email.unique' => 'Email already exists',
 
             // password
-            'password' => 'Password is required',
-            'password.string' => 'Password must be in string',
+            'password.required' => 'Password is required',
+            'password.string' => 'Password must be a string',
             'password.min' => 'Password must be at least 6 characters',
             'password.max' => 'Password must be at most 12 characters',
 
@@ -59,6 +59,8 @@ class RegisterRequest extends FormRequest
 
             // role
             'role.required' => 'Role is required',
+            'role.integer' => 'Role must be a valid role id',
+            'role.exists' => 'Selected role is invalid',
 
         ];
     }

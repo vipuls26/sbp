@@ -8,7 +8,7 @@
     </div>
 
     <div class="sm:mx-auto sm:w-full sm:max-w-sm">
-        <form action="{{ route('plan.store') }}" method="POST" class="space-y-6">
+        <form action="{{ route('plans.store') }}" method="POST" class="space-y-6">
             @csrf
             {{-- name --}}
             <div>
@@ -122,6 +122,4 @@
             </div>
         </form>
     </div>
-
-    <x-footer />
 </x-layout>

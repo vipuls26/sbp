@@ -15,30 +15,30 @@ class AdminController extends Controller
         return view('admin.dashboard', $dashboard);
     }
 
-    public function allUser()
+    public function users()
     {
-        $users = $this->adminService->totalUser();
+        $users = $this->adminService->users();
         return view('admin.users', compact('users'));
     }
 
     // block user
-    public function block(User $user)
+    public function blockUser(User $user)
     {
         $this->adminService->block($user->id);
         return redirect()->route('admin.dashboard')->with('success', 'User Block Successfully');
     }
 
     // unblock user
-    public function unblock(User $user)
+    public function restoreUser(User $user)
     {
-        $this->adminService->unblock($user->id);
+        $this->adminService->restore($user->id);
         return redirect()->route('admin.dashboard')->with('success', 'User Unblock Successfully');
     }
 
     // subscriber
-    public function subscriber()
+    public function subscribers()
     {
-        $subscribers = $this->adminService->totalSubscriber();
+        $subscribers = $this->adminService->subscribers();
         return view('admin.subscriber', compact('subscribers'));
     }
 }

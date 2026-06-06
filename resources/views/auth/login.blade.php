@@ -6,7 +6,7 @@
         </div>
 
         <div class="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-            <form action="{{ route('auth.loginUser') }}" method="POST" class="space-y-6">
+            <form action="{{ route('auth.authenticate') }}" method="POST" class="space-y-6">
                 @csrf
                 {{-- email --}}
                 <div>

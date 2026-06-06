@@ -10,9 +10,9 @@ class PaymentService
         private PaymentRepositoryInterface $paymentRepositoryInterface
     ) {}
 
-    // add payment data in db
+    // store payment data
     public function create(array $data)
     {
-        return $this->paymentRepositoryInterface->checkout($data);
+        return $this->paymentRepositoryInterface->create($data);
     }
 }

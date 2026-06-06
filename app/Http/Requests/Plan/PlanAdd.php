@@ -37,11 +37,10 @@ class PlanAdd extends FormRequest
             // plan name
             'name.required' => 'Plan name is required',
             'name.string' => 'Plan name must be a string',
-            'name.max' => 'Plan name may not be greater than 255 characters',
+            'name.max' => 'Plan name may not be greater than 50 characters',
             'name.unique' => 'Plan name already exists',
 
             // plan description
-            'description.required' => 'Plan description is required',
             'description.string' => 'Plan description must be a string',
 
             // plan pricing

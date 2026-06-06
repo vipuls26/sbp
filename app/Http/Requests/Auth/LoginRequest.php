@@ -24,16 +24,14 @@ class LoginRequest extends FormRequest
     public function messages()
     {
         return [
-
             // email
             'email.required' => 'Email is required',
             'email.string' => 'Email must be in string',
             'email.email' => 'Email must be a valid email address',
             'email.max' => 'Email must be at most 255 characters',
-            'email.unique' => 'Email already exists',
 
             // password
-            'password' => 'Password is required',
+            'password.required' => 'Password is required',
             'password.string' => 'Password must be in string',
             'password.min' => 'Password must be at least 6 characters',
             'password.max' => 'Password must be at most 12 characters',

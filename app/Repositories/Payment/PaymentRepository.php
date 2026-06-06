@@ -8,10 +8,10 @@ use Override;
 
 class PaymentRepository implements PaymentRepositoryInterface
 {
-    // create payment
-    public function checkout(array $data)
+    // store payment data
+    public function create(array $data)
     {
-        $payment = Payment::create([
+        return Payment::create([
             'subscriber_id' => $data['subscriber_id'],
             'plan_id' => $data['plan_id'],
             'razor_order_id' => $data['razor_order_id'],
@@ -19,9 +19,7 @@ class PaymentRepository implements PaymentRepositoryInterface
             'razor_signature' => $data['razor_signature'],
             'amount' => $data['amount'],
             'status' => $data['status'],
-            'paid_at' => $data['paid_at']
+            'paid_at' => $data['paid_at'],
         ]);
-
-        return $payment;
     }
 }

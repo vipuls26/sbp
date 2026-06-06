@@ -8,26 +8,21 @@ use Illuminate\Support\Facades\Auth;
 
 class PlanRepository implements PlanRepositoryInterface
 {
-   
-    // create plan in db
+
+    // create a plan record
     public function create(array $data)
     {
-        $plan = Plan::create([
+        return Plan::create([
             'name' => $data['name'],
             'description' => $data['description'],
             'pricing' => $data['pricing'],
             'duration' => $data['duration'],
-            'is_active' => array_key_exists('is_active', $data)
-                ? $this->$data['is_active']
-                : 'true',
-            'admin_id' => Auth::id()
+            'admin_id' => Auth::id(),
         ]);
-
-        return $plan;
     }
 
-    // active/deactive plan
-    public function status(int $id)
+    // toggle active/deactive plan status
+    public function toggleStatus(int $id)
     {
         $plan = Plan::withCount('subscriptions')->findOrFail($id);
 
@@ -49,25 +44,22 @@ class PlanRepository implements PlanRepositoryInterface
         ];
     }
 
-    // update plan
+    // update a plan record
     public function update(int $id, array $data)
     {
-
-        $plan =  Plan::updateOrCreate(
+        return Plan::updateOrCreate(
             ['id' => $id],
             [
                 'name' => $data['name'],
                 'description' => $data['description'],
                 'pricing' => $data['pricing'],
-                'duration' => $data['duration']
+                'duration' => $data['duration'],
             ]
         );
-
-        return $plan;
     }
 
-    // delete plan
-    public function destroy(int $id)
+    // delete a plan record
+    public function delete(int $id)
     {
         return Plan::destroy($id);
     }

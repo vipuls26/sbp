@@ -41,6 +41,8 @@
     </script>
 
     @stack('scripts')
+
+    <x-footer />
 </body>
 
 </html>

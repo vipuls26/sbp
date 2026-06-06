@@ -41,7 +41,7 @@
                     </div>
 
 
-                    <form method="POST" action="{{ route('payment.makePayment', $plan) }}">
+                    <form method="POST" action="{{ route('payments.store', $plan) }}">
                         @csrf
 
                         <div class="mb-4">
@@ -122,6 +122,4 @@
 
         </div>
     </div>
-    <x-footer />
-
 </x-layout>

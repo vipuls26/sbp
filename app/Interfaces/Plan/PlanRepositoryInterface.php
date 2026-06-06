@@ -4,16 +4,16 @@ namespace App\Interfaces\Plan;
 
 interface PlanRepositoryInterface
 {
-    // add plan in db
+    // create a plan record
     public function create(array $data);
 
-    // update plan
+    // update a plan record
     public function update(int $id, array $data);
 
     // toggle active status
-    public function status(int $id);
+    public function toggleStatus(int $id);
 
-    // delete plan
-    public function destroy(int $id);
+    // delete a plan record
+    public function delete(int $id);
 
 }

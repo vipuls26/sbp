@@ -39,6 +39,10 @@ class SubscriptionService
     {
         $plan = Plan::findOrFail($planId);
 
+        if ($plan->is_active !== 'true') {
+            abort(404);
+        }
+
         // update subscription data
         $data = [
             'plan_id' => $plan->id,
