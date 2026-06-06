@@ -18,23 +18,30 @@ class PaymentController extends Controller
         private SubscriptionService $subscriptionService
     ) {}
 
+    //   create subscription with razorpay
     public function create(Plan $plan)
     {
+        // check if plan active
         abort_if($plan->is_active !== 'true', 404);
 
         try {
+            // initialize the Razorpay API using our keys from the .env file.
             $api = new Api(config('services.razorpay.key'), config('services.razorpay.secret'));
 
+            // create new order
             $order = $api->order->create([
+                // generate a unique receipt ID for this payment
                 'receipt' => 'plan_' . $plan->id . '_' . Auth::id() . '_' . now()->timestamp,
+                // except amount in paisa
                 'amount' => (int) round($plan->pricing * 100),
-                'currency' => 'INR',
+                'currency' => 'INR', // using indian currency
             ]);
         } catch (\Throwable $e) {
             return back()->with('error', 'Payment order could not be created. Please try again.');
         }
 
-        // Save the payment attempt before the checkout opens.
+
+        // save payment record in db
         $payment = $this->paymentService->create([
             'subscriber_id' => Auth::id(),
             'plan_id' => $plan->id,
@@ -46,6 +53,7 @@ class PaymentController extends Controller
             'paid_at' => null,
         ]);
 
+        // return on balde file with payment detail to pay
         return view('payment.page', [
             'plan' => $plan,
             'razorpayKey' => config('services.razorpay.key'),
@@ -56,18 +64,27 @@ class PaymentController extends Controller
         ]);
     }
 
+    // if payment made then this save data in db
     public function store(PaymentRequest $request, Plan $plan)
     {
+        // check again if plan is active
         abort_if($plan->is_active !== 'true', 404);
 
+        // initialize Razorpay API again
         $api = new Api(config('services.razorpay.key'), config('services.razorpay.secret'));
+
+        // get data validated
         $validated = $request->validated();
+
+        // find save record with pending status
         $payment = $this->paymentService->findByOrderId($validated['razorpay_order_id']);
+
 
         if (! $payment) {
             return back()->with('error', 'Pending payment record not found. Please try again.');
         }
 
+        // verify the payment signature.
         try {
             $api->utility->verifyPaymentSignature([
                 'razorpay_order_id' => $validated['razorpay_order_id'],
@@ -75,6 +92,7 @@ class PaymentController extends Controller
                 'razorpay_signature' => $validated['razorpay_signature'],
             ]);
         } catch (SignatureVerificationError $e) {
+            // change status as failed if signature not match
             $this->paymentService->updateByOrderId($validated['razorpay_order_id'], [
                 'razor_payment_id' => $validated['razorpay_payment_id'],
                 'razor_signature' => $validated['razorpay_signature'],
@@ -87,6 +105,7 @@ class PaymentController extends Controller
         DB::transaction(function () use ($plan, $validated) {
             $razorpaySignature = $validated['razorpay_signature'];
 
+            // update record if payment is complete with paid at timestamp
             $this->paymentService->updateByOrderId($validated['razorpay_order_id'], [
                 'razor_payment_id' => $validated['razorpay_payment_id'],
                 'razor_signature' => $razorpaySignature,
@@ -94,9 +113,11 @@ class PaymentController extends Controller
                 'paid_at' => now(),
             ]);
 
+            // update subscription plan
             $this->subscriptionService->update(Auth::id(), $plan->id);
         });
 
+        // redirect to dashboard
         return redirect()->route('user.plans')->with('success', 'Payment completed and subscription activated successfully.');
     }
 }
