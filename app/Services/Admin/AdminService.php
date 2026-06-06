@@ -3,6 +3,7 @@
 namespace App\Services\Admin;
 
 use App\Interfaces\Admin\AdminRepositoryInterface;
+use App\Models\Payment;
 use App\Models\Plan;
 use App\Models\Subscription;
 use App\Models\User;
@@ -34,6 +35,12 @@ class AdminService
 
             'totalEarning' => Subscription::totalEarning()
                 ->value('total_earning') ?? 0,
+
+
+            'latestPayments' => Payment::with('subscriber', 'plan')
+                ->latest()
+                ->take(5)
+                ->get(),
         ];
     }
 
