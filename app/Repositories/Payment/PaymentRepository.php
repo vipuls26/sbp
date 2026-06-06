@@ -22,4 +22,19 @@ class PaymentRepository implements PaymentRepositoryInterface
             'paid_at' => $data['paid_at'],
         ]);
     }
+
+    // update payment data by Razorpay order id
+    public function updateByOrderId(string $orderId, array $data)
+    {
+        $payment = Payment::where('razor_order_id', $orderId)->firstOrFail();
+        $payment->update($data);
+
+        return $payment;
+    }
+
+    // find payment data by Razorpay order id
+    public function findByOrderId(string $orderId)
+    {
+        return Payment::where('razor_order_id', $orderId)->first();
+    }
 }

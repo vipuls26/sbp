@@ -41,77 +41,15 @@
                     </div>
 
 
-                    <form method="POST" action="{{ route('payments.store', $plan) }}">
+                    <form id="razorpay-form" method="POST" action="{{ route('payments.store', $plan) }}">
                         @csrf
+                        <input type="hidden" name="payment_id" value="{{ $paymentId }}">
+                        <input type="hidden" name="razorpay_payment_id" id="razorpay_payment_id">
+                        <input type="hidden" name="razorpay_order_id" id="razorpay_order_id"
+                            value="{{ $orderId }}">
+                        <input type="hidden" name="razorpay_signature" id="razorpay_signature">
 
-                        <div class="mb-4">
-                            <label for="card_holder" class="block text-sm font-medium mb-2">
-                                Card Holder Name
-                            </label>
-                            <input id="card_holder" type="text" name="card_holder" value="{{ old('card_holder') }}"
-                                placeholder="John Doe"
-                                class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            @error('card_holder')
-                                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        <div class="mb-4">
-                            <label for="card_number" class="block text-sm font-medium mb-2">
-                                Card Number
-                            </label>
-                            <input id="card_number" type="text" name="card_number" value="{{ old('card_number') }}"
-                                placeholder="4242 4242 4242 4242"
-                                class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            @error('card_number')
-                                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-4 mb-4">
-                            <div>
-                                <label for="expiry" class="block text-sm font-medium mb-2">
-                                    Expiry Date
-                                </label>
-                                <input id="expiry" type="text" name="expiry" value="{{ old('expiry') }}"
-                                    placeholder="12/30"
-                                    class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                @error('expiry')
-                                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                                @enderror
-                            </div>
-
-                            <div>
-                                <label for="cvv" class="block text-sm font-medium mb-2">
-                                    CVV
-                                </label>
-                                <input id="cvv" type="password" name="cvv" value="{{ old('cvv') }}"
-                                    placeholder="123"
-                                    class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                @error('cvv')
-                                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                                @enderror
-                            </div>
-                        </div>
-
-
-                        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
-                            <h4 class="font-semibold text-yellow-800 mb-2">
-                                Razorpay Test Card
-                            </h4>
-
-                            <p class="text-sm text-yellow-700">
-                                Card Number: 4111 1111 1111 1111
-                            </p>
-                            <p class="text-sm text-yellow-700">
-                                Expiry: Any Future Date
-                            </p>
-                            <p class="text-sm text-yellow-700">
-                                CVV: Any 3 Digits
-                            </p>
-                        </div>
-
-                        <button type="submit"
+                        <button type="button" id="pay-now-btn"
                             class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition">
                             Pay ₹{{ $plan->pricing }}
                         </button>
@@ -122,4 +60,40 @@
 
         </div>
     </div>
+
+    @push('scripts')
+        <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+        <script>
+            document.getElementById('pay-now-btn').addEventListener('click', function() {
+                if (typeof Razorpay === 'undefined') {
+                    alert('Razorpay checkout failed to load. Please check your internet connection.');
+                    return;
+                }
+
+                const options = {
+                    key: @json($razorpayKey),
+                    amount: @json($amount),
+                    currency: @json($currency),
+                    name: @json(config('app.name')),
+                    description: @json($plan->name . ' Subscription'),
+                    order_id: @json($orderId),
+                    handler: function(response) {
+                        document.getElementById('razorpay_payment_id').value = response.razorpay_payment_id;
+                        document.getElementById('razorpay_order_id').value = response.razorpay_order_id;
+                        document.getElementById('razorpay_signature').value = response.razorpay_signature;
+                        document.getElementById('razorpay-form').submit();
+                    },
+                    prefill: {
+                        name: @json(auth()->user()->name),
+                        email: @json(auth()->user()->email),
+                    },
+                    theme: {
+                        color: '#2563eb'
+                    }
+                };
+
+                new Razorpay(options).open();
+            });
+        </script>
+    @endpush
 </x-layout>

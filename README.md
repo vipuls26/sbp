@@ -7,7 +7,8 @@ It includes:
 - user registration and login
 - admin and user roles
 - plan crud for admins
-- subscription purchase, upgrade, downgrade, and cancel flows for users
+- subscription purchase, upgrade, downgrade, renew, and cancel flows for users
+- Razorpay payment checkout with payment verification
 - soft delete support for users and plans
 - Blade views styled with Tailwind CSS
 
@@ -28,6 +29,7 @@ It includes:
   - view active plans
   - subscribe to a plan
   - update or cancel subscription
+  - pay through Razorpay checkout
 
 ## Project Structure
 
@@ -39,6 +41,35 @@ It includes:
 - `resources/views` - Blade templates
 - `database/migrations` - database schema
 - `database/seeders` - seed data
+
+## Payment Flow
+
+The app uses a payment-first flow.
+
+1. User selects a plan from the plans page.
+2. The app creates a pending payment record.
+3. The app creates a Razorpay order.
+4. Razorpay checkout opens in the browser.
+5. Razorpay returns `razorpay_payment_id`, `razorpay_order_id`, and `razorpay_signature`.
+6. The backend verifies the signature.
+7. If verification passes, the payment is marked as `success`.
+8. The subscription is then created or updated.
+
+Current payment routes:
+
+- `GET /payment/page/{plan}` - show Razorpay checkout page
+- `POST /payment/make-payment/{plan}` - verify payment and activate subscription
+
+## Environment
+
+Add these keys in `.env` for Razorpay:
+
+```env
+RAZORPAY_KEY_ID=your_key_id
+RAZORPAY_KEY_SECRET=your_key_secret
+```
+
+The same keys are already mapped in `config/services.php`.
 
 ## Setup
 
@@ -101,4 +132,4 @@ php artisan serve
 - This app uses role-based middleware for admin and user routes.
 - Plan and subscription rules are handled in the service and repository layers.
 - Soft deletes are used for users and plans.
-
+- The app keeps one subscription row per user and updates it on payment success.
