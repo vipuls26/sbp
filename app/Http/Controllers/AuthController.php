@@ -17,12 +17,12 @@ class AuthController extends Controller
     // show register form
     public function showRegisterForm()
     {
-        // get role with there id
-        $roles = $roles = Role::notAdminRole()->get();
+        // Users should only register as a normal user.
+        $roles = Role::where('name', 'user')->get();
         return view('auth.register', compact('roles'));
     }
 
-    public function register(RegisterRequest $request)
+    public function store(RegisterRequest $request)
     {
         // validate input data + call auth service for register
         $this->authService->register($request->validated());
@@ -35,10 +35,10 @@ class AuthController extends Controller
         return view('auth.login');
     }
 
-    public function login(LoginRequest $request)
+    public function authenticate(LoginRequest $request)
     {
         // validate input data + call auth service for login
-        $success = $this->authService->login($request->validated());
+        $success = $this->authService->authenticate($request->validated());
 
         // if email not found then redirect to with msg
         if (!$success) {

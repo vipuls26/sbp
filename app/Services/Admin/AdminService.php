@@ -25,7 +25,7 @@ class AdminService
                 ->userOnly()
                 ->count(),
 
-            'subscriptions' => Subscription::with('plan', 'user')
+            'subscriptions' => Subscription::with('plan', 'subscriber')
                 ->latest()
                 ->get(),
 
@@ -37,18 +37,16 @@ class AdminService
         ];
     }
 
-    // all user
-    public function totalUser()
+    // all users
+    public function users()
     {
-        $users = User::withTrashed()->userOnly()->get();
-        return $users;
+        return User::withTrashed()->userOnly()->get();
     }
 
-    // subscriber
-    public function totalSubscriber()
+    // subscribers
+    public function subscribers()
     {
-        $subscribers = Subscription::with('plan', 'user')->get();
-        return $subscribers;
+        return Subscription::with('plan', 'subscriber')->get();
     }
 
 
@@ -58,15 +56,9 @@ class AdminService
         return $this->adminRepository->block($id);
     }
 
-    // unblock user
-    public function unblock(int $id)
+    // restore a blocked user
+    public function restore(int $id)
     {
-        return $this->adminRepository->unblock($id);
-    }
-
-    // subscription detail
-    public function subscriber()
-    {
-        return Subscription::with(['plan', 'user'])->get();
+        return $this->adminRepository->restore($id);
     }
 }

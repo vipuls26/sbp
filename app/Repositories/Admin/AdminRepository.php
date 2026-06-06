@@ -10,14 +10,11 @@ class AdminRepository implements AdminRepositoryInterface
     // block user
     public function block(int $id)
     {
-        $user = User::destroy($id);
-        return $user;
+        return User::destroy($id);
     }
 
-    public function unblock(int $id)
+    public function restore(int $id)
     {
-
-        $user = User::withTrashed()->findOrFail($id)->restore();
-        return $user;
+        return User::withTrashed()->findOrFail($id)->restore();
     }
 }

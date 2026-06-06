@@ -11,13 +11,13 @@ use Illuminate\Support\Facades\Auth;
 #[Fillable(['plan_id', 'subscriber_id', 'start_date', 'end_date', 'status'])]
 class Subscription extends Model
 {
-    // user has multiple subscription
-    public function user()
+    // subscription belongs to the subscriber
+    public function subscriber()
     {
         return $this->belongsTo(User::class, 'subscriber_id');
     }
 
-    // subcription belong to plan
+    // subscription belongs to a plan
     public function plan()
     {
         return $this->belongsTo(Plan::class);
@@ -28,10 +28,14 @@ class Subscription extends Model
     #[Scope]
     protected function activeSubscription(Builder $query): void
     {
-        $query->whereHas('user', function ($query) {
-            $query->where('subscriber_id', Auth::user()->id);
-        });
+        if (! Auth::check()) {
+            return;
+        }
+
+        $query->where('subscriber_id', Auth::id())
+            ->where('end_date', '>', now());
     }
+
 
     // subscription expried
     #[Scope]
@@ -48,5 +52,4 @@ class Subscription extends Model
             ->leftJoin('plans', 'subscriptions.plan_id', '=', 'plans.id')
             ->selectRaw('COALESCE(SUM(plans.pricing), 0) as total_earning');
     }
-
 }

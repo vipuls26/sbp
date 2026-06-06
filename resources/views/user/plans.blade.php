@@ -22,15 +22,12 @@
                         </div>
 
                         @if (!$subscription)
-                            <form action="{{ route('subscription.storeSubscription', $plan) }}" method="POST">
-                                @csrf
-                                <button
-                                    class="w-full mt-6 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md20">
-                                    Choose Plan
-                                </button>
-                            </form>
+                            <a href="{{ route('payments.create', $plan) }}"
+                                class="block w-full mt-6 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md20 text-center">
+                                Choose Plan
+                            </a>
                         @elseif ($plan->id != $subscription->plan_id)
-                            <form action="{{ route('subscription.update', $plan->id) }}" method="POST">
+                            <form action="{{ route('subscriptions.update', $plan->id) }}" method="POST">
                                 @csrf
                                 @method('PUT')
 
@@ -54,7 +51,7 @@
                                     Current Plan
                                 </button>
 
-                                <form action="{{ route('subscription.cancel') }}" method="POST">
+                                <form action="{{ route('subscriptions.destroy') }}" method="POST">
                                     @csrf
                                     <button
                                         class="w-full mt-6 bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md">
@@ -76,7 +73,4 @@
             @endif
         </div>
     </div>
-
-    <x-footer />
-
 </x-layout>

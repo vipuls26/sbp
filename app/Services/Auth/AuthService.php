@@ -11,14 +11,14 @@ class AuthService
         private UserRepositoryInterface $userRepository
     ) {}
 
-    // register service
+    // create a new user account
     public function register(array $data)
     {
         return $this->userRepository->create($data);
     }
 
-    // login service
-    public function login(array $data)
+    // authenticate an existing user
+    public function authenticate(array $data)
     {
         $user = $this->userRepository->findByEmail($data['email']);
 
@@ -29,7 +29,7 @@ class AuthService
         return Auth::attempt($data);
     }
 
-    // logout service
+    // log out the current user
     public function logout()
     {
         Auth::logout();

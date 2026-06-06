@@ -14,8 +14,8 @@ class Plan extends Model
 {
     use SoftDeletes;
 
-    // plan created by admin
-    public function admin()
+    // plan created by an admin user
+    public function createdBy()
     {
         return $this->belongsTo(User::class, 'admin_id');
     }
@@ -30,8 +30,12 @@ class Plan extends Model
     #[Scope]
     protected function notSubscribed(Builder $query): void
     {
+        if (! Auth::check()) {
+            return;
+        }
+
         $query->whereDoesntHave('subscriptions', function ($query) {
-            $query->where('subscriber_id', Auth::user()->id);
+            $query->where('subscriber_id', Auth::id());
         });
     }
 
@@ -39,7 +43,12 @@ class Plan extends Model
     #[Scope]
     protected function activeSubscription(Builder $query): void
     {
+        if (! Auth::check()) {
+            return;
+        }
+
         $query->whereHas('subscriptions', function ($query) {
+            $query->where('subscriber_id', Auth::id());
             $query->where('end_date', '>', now());
         });
     }

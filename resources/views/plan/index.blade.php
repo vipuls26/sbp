@@ -4,7 +4,7 @@
 
     <div class="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8">
         <div class="flex justify-end pb-2">
-            <a href="{{ route('plan.add') }}" class="bg-slate-900 p-3 rounded-2xl text-white "> Add Plan </a>
+            <a href="{{ route('plans.create') }}" class="bg-slate-900 p-3 rounded-2xl text-white "> Add Plan </a>
         </div>
         <div class="overflow-x-auto rounded-lg shadow-md">
             <table class="min-w-full bg-white border border-gray-200">
@@ -61,12 +61,12 @@
                             <td class="px-4 py-3">
                                 <div class="flex justify-center gap-2">
 
-                                    <a href="{{ route('plan.edit', $plan) }}"
+                                    <a href="{{ route('plans.edit', $plan) }}"
                                         class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded">
                                         Edit
                                     </a>
 
-                                    <form action="{{ route('plan.destroy', $plan) }}" method="POST">
+                                    <form action="{{ route('plans.toggle-status', $plan) }}" method="POST">
                                         @csrf
 
                                         @if ($plan->is_active == 'true')
@@ -100,5 +100,4 @@
             </table>
         </div>
     </div>
-    <x-footer />
 </x-layout>

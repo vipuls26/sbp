@@ -6,7 +6,7 @@
           </div>
 
           <div class="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-              <form action="{{ route('auth.create') }}" method="POST" class="space-y-6">
+              <form action="{{ route('auth.store') }}" method="POST" class="space-y-6">
                   @csrf
 
                   {{-- name --}}
@@ -111,7 +111,7 @@
                                         name="role"
                                         type="radio"
                                         value="{{ $role->id }}"
-                                        @checked( $role->name  === 'user')
+                                        @checked($role->name === 'user')
                                         class="role-radio h-4 w-4 border-slate-200 text-slate-700">
                                     <label for="{{ $role->name }}" class="ml-3 text-sm font-medium text-gray-700">
                                         {{ $role->name }}

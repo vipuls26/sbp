@@ -56,14 +56,15 @@ class PlanUpdate extends FormRequest
     public function messages(): array
     {
         return [
-
             // plan name
             'name.required' => 'Plan name is required',
             'name.string' => 'Plan name must be a string',
-            'name.max' => 'Plan name may not be greater than 255 characters',
+            'name.max' => 'Plan name may not be greater than 50 characters',
 
             // plan description
-            'description.required' => 'Plan description is required',
+            'description.string' => 'Plan description must be a string',
+
+            // plan pricing
             'pricing.required' => 'Plan pricing is required',
             'pricing.numeric' => 'Plan pricing must be a number',
             'pricing.min' => 'Plan pricing must be a positive value',

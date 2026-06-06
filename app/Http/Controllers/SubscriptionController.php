@@ -10,22 +10,33 @@ class SubscriptionController extends Controller
 {
     public function __construct(private SubscriptionService $subscriptionService) {}
 
-    // add subscription
-    public function storeSubscription(Plan $plan)
+    // keep the route valid and send the user to the pricing page
+    public function index()
     {
-        $this->subscriptionService->create($plan);
-        return redirect()->route('user.plans')->with('success', 'Plan Subscribed Successfully');
+        return redirect()->route('user.plans');
+    }
+
+    // start a subscription by moving the user to payment
+    public function store(Plan $plan)
+    {
+        abort_if($plan->is_active !== 'true', 404);
+
+        return redirect()
+            ->route('payments.create', $plan)
+            ->with('success', 'Please complete the payment to activate your plan.');
     }
 
     // update subscription
-    public function update(int $id)
+    public function update(Plan $plan)
     {
-        $this->subscriptionService->update(Auth::user()->id, $id);
+        abort_if($plan->is_active !== 'true', 404);
+
+        $this->subscriptionService->update(Auth::id(), $plan->id);
         return redirect()->route('user.plans')->with('success', 'Subscription Updated Successfully');
     }
 
     // cancel subscription
-    public function cancel()
+    public function destroy()
     {
         $this->subscriptionService->cancel(Auth::user()->id);
         return redirect()->route('user.plans')->with('success', 'Subscription Canceled Successfully');
