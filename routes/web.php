@@ -89,3 +89,9 @@ Route::prefix('/payment')->middleware('role:user')->group(function () {
 
 // Stripe
 Route::get('/stripe/test', [StripeController::class, 'test']);
+
+Route::get('/stripe/checkout', [StripeController::class, 'checkout']);
+
+Route::get('/stripe/success', function () {
+    return 'Payment Success';
+})->name('stripe.success');
