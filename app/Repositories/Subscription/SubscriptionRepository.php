@@ -25,6 +25,7 @@ class SubscriptionRepository implements SubscriptionRepositoryInterface
         return $subscription;
     }
 
+    // cancel subscription
     public function cancel(int $subscriberId)
     {
         return Subscription::where('subscriber_id', $subscriberId)->delete();

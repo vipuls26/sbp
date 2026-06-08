@@ -78,7 +78,12 @@ Route::prefix('/subscription')->middleware('role:user')->group(function () {
 
 Route::prefix('/payment')->middleware('role:user')->group(function () {
     // show payment page
-    Route::get('/page/{plan}', [PaymentController::class, 'create'])->name('payments.create');
+    Route::get('/payment/{plan}', [PaymentController::class, 'create'])->name('payments.create');
     // add payment
     Route::post('/make-payment/{plan}', [PaymentController::class, 'store'])->name('payments.store');
+});
+
+
+Route::get('/webhooks/razorpay', function () {
+    return response()->json(['message' => 'Webhook endpoint is ready']);
 });

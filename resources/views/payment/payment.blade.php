@@ -24,7 +24,7 @@
 
                         <div class="flex items-center justify-between rounded-xl bg-black/40 px-4 py-3">
                             <span class="text-sm text-gray-400">Duration</span>
-                            <span class="font-medium text-white">{{ ucfirst($plan->duration) }}</span>
+                            <span class="font-medium text-white">{{ $plan->duration }}</span>
                         </div>
 
                         <div class="flex items-center justify-between rounded-xl bg-black/40 px-4 py-3">
