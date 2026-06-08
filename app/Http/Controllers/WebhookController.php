@@ -46,6 +46,8 @@ class WebhookController extends Controller
 
         $data = json_decode($payload, true);
 
+        Log::info('payload', $data);
+
         if (! is_array($data)) {
             Log::warning('Razorpay webhook payload is not valid JSON.');
 

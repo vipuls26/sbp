@@ -5,17 +5,15 @@ namespace App\Http\Controllers;
 use App\Http\Requests\Payment\PaymentRequest;
 use App\Models\Plan;
 use App\Services\Payment\PaymentService;
-use App\Services\Subscription\SubscriptionService;
+use App\Services\Razorpay\RazorpayApiService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-use Razorpay\Api\Api;
-use Razorpay\Api\Errors\SignatureVerificationError;
 
 class PaymentController extends Controller
 {
     public function __construct(
         private PaymentService $paymentService,
-        private SubscriptionService $subscriptionService
+        private RazorpayApiService $razorpayApiService
     ) {}
 
     //   create subscription with razorpay
@@ -25,24 +23,25 @@ class PaymentController extends Controller
         abort_if($plan->is_active !== 'true', 404);
 
         try {
-            // initialize the Razorpay API using our keys from the .env file.
-            $api = new Api(config('services.razorpay.key'), config('services.razorpay.secret'));
-
-            // create new order
-            $order = $api->order->create([
-                // generate a unique receipt ID for this payment
+            $order = $this->razorpayApiService->createOrder([
                 'receipt' => 'plan_' . $plan->id . '_' . Auth::id() . '_' . now()->timestamp,
-                // except amount in paisa
                 'amount' => (int) round($plan->pricing * 100),
-                'currency' => 'INR', // using indian currency
+                'currency' => 'INR'
             ]);
+
         } catch (\Throwable $e) {
+            Log::error('Payment order could not be created.', [
+                'plan_id' => $plan->id,
+                'user_id' => Auth::id(),
+                'error' => $e->getMessage(),
+            ]);
+
             return back()->with('error', 'Payment order could not be created. Please try again.');
         }
 
 
-        // save payment record in db
-        $payment = $this->paymentService->create([
+        // Save a pending payment record before opening Razorpay checkout.
+        $this->paymentService->create([
             'subscriber_id' => Auth::id(),
             'plan_id' => $plan->id,
             'razor_order_id' => $order['id'],
@@ -58,7 +57,6 @@ class PaymentController extends Controller
             'plan' => $plan,
             'razorpayKey' => config('services.razorpay.key'),
             'orderId' => $order['id'],
-            'paymentId' => $payment->id,
             'amount' => (int) round($plan->pricing * 100),
             'currency' => 'INR',
         ]);
@@ -97,23 +95,15 @@ class PaymentController extends Controller
 
             return redirect()
                 ->route('user.plans')
-                ->with('success', 'Payment already processed successfully.');
+                ->with('success', 'Plan subscribe successfully.');
         }
 
-        $api = new Api(
-            config('services.razorpay.key'),
-            config('services.razorpay.secret')
-        );
-
         try {
-            $api->utility->verifyPaymentSignature([
-                'razorpay_order_id' => $validated['razorpay_order_id'],
-                'razorpay_payment_id' => $validated['razorpay_payment_id'],
-                'razorpay_signature' => $validated['razorpay_signature'],
-            ]);
-        } catch (SignatureVerificationError $e) {
+            $this->razorpayApiService->verifyPaymentSignature($validated);
+        } catch (\Throwable $e) {
             Log::warning('Browser callback signature verification failed.', [
                 'order_id' => $validated['razorpay_order_id'],
+                'error' => $e->getMessage(),
             ]);
 
             return redirect()
