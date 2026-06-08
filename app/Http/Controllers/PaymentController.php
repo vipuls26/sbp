@@ -7,7 +7,7 @@ use App\Models\Plan;
 use App\Services\Payment\PaymentService;
 use App\Services\Subscription\SubscriptionService;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Razorpay\Api\Api;
 use Razorpay\Api\Errors\SignatureVerificationError;
 
@@ -67,24 +67,44 @@ class PaymentController extends Controller
     // if payment made then this save data in db
     public function store(PaymentRequest $request, Plan $plan)
     {
-        // check again if plan is active
+        Log::info('Browser callback executed');
+
         abort_if($plan->is_active !== 'true', 404);
 
-        // initialize Razorpay API again
-        $api = new Api(config('services.razorpay.key'), config('services.razorpay.secret'));
-
-        // get data validated
         $validated = $request->validated();
 
-        // find save record with pending status
-        $payment = $this->paymentService->findByOrderId($validated['razorpay_order_id']);
-
+        $payment = $this->paymentService->findByOrderId(
+            $validated['razorpay_order_id']
+        );
 
         if (! $payment) {
-            return back()->with('error', 'Pending payment record not found. Please try again.');
+            return redirect()
+                ->route('user.plans')
+                ->with('error', 'Payment record not found.');
         }
 
-        // verify the payment signature.
+        // Payment already processed by webhook
+        if ($payment->status === 'success') {
+            // Store signature if webhook processed first
+            if (empty($payment->razor_signature)) {
+                $this->paymentService->updateByOrderId(
+                    $validated['razorpay_order_id'],
+                    [
+                        'razor_signature' => $validated['razorpay_signature'],
+                    ]
+                );
+            }
+
+            return redirect()
+                ->route('user.plans')
+                ->with('success', 'Payment already processed successfully.');
+        }
+
+        $api = new Api(
+            config('services.razorpay.key'),
+            config('services.razorpay.secret')
+        );
+
         try {
             $api->utility->verifyPaymentSignature([
                 'razorpay_order_id' => $validated['razorpay_order_id'],
@@ -92,32 +112,25 @@ class PaymentController extends Controller
                 'razorpay_signature' => $validated['razorpay_signature'],
             ]);
         } catch (SignatureVerificationError $e) {
-            // change status as failed if signature not match
-            $this->paymentService->updateByOrderId($validated['razorpay_order_id'], [
-                'razor_payment_id' => $validated['razorpay_payment_id'],
-                'razor_signature' => $validated['razorpay_signature'],
-                'status' => 'failed',
+            Log::warning('Browser callback signature verification failed.', [
+                'order_id' => $validated['razorpay_order_id'],
             ]);
 
-            return back()->with('error', 'Payment verification failed. Please try again.');
+            return redirect()
+                ->route('user.plans')
+                ->with('error', 'Payment verification failed.');
         }
 
-        DB::transaction(function () use ($plan, $validated) {
-            $razorpaySignature = $validated['razorpay_signature'];
+        // Payment status and subscription are handled by webhook.
+        $this->paymentService->updateByOrderId(
+            $validated['razorpay_order_id'],
+            [
+                'razor_signature' => $validated['razorpay_signature'],
+            ]
+        );
 
-            // update record if payment is complete with paid at timestamp
-            $this->paymentService->updateByOrderId($validated['razorpay_order_id'], [
-                'razor_payment_id' => $validated['razorpay_payment_id'],
-                'razor_signature' => $razorpaySignature,
-                'status' => 'success',
-                'paid_at' => now(),
-            ]);
-
-            // update subscription plan
-            $this->subscriptionService->update(Auth::id(), $plan->id);
-        });
-
-        // redirect to dashboard
-        return redirect()->route('user.plans')->with('success', 'Payment completed and subscription activated successfully.');
+        return redirect()
+            ->route('user.plans')
+            ->with('success', 'Payment received successfully.');
     }
 }
