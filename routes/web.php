@@ -4,6 +4,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PlanController;
+use App\Http\Controllers\StripeController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -82,3 +83,9 @@ Route::prefix('/payment')->middleware('role:user')->group(function () {
     // add payment
     Route::post('/make-payment/{plan}', [PaymentController::class, 'store'])->name('payments.store');
 });
+
+
+
+
+// Stripe
+Route::get('/stripe/test', [StripeController::class, 'test']);
