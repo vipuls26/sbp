@@ -34,8 +34,7 @@
             <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-sm font-medium text-slate-500">Latest Payments</p>
-                        <h2 class="mt-1 text-xl font-bold text-slate-900">Recent transaction list</h2>
+                        <h2 class="mt-1 text-xl font-bold text-slate-900">Transaction list</h2>
                     </div>
                 </div>
 
@@ -67,7 +66,7 @@
                                             {{ $payment->status === 'success' ? 'bg-emerald-100 text-emerald-700' : '' }}
                                             {{ $payment->status === 'pending' ? 'bg-amber-100 text-amber-700' : '' }}
                                             {{ $payment->status === 'failed' ? 'bg-red-100 text-red-700' : '' }}">
-                                            {{ ucfirst($payment->status) }}
+                                            {{ $payment->status }}
                                         </span>
                                     </td>
                                     <td class="py-4 pr-4 text-slate-500">

@@ -10,7 +10,7 @@ class SubscriptionController extends Controller
 {
     public function __construct(private SubscriptionService $subscriptionService) {}
 
-    // keep the route valid and send the user to the pricing page
+    // show pricing page to user
     public function index()
     {
         return redirect()->route('user.plans');

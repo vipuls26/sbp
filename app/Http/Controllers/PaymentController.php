@@ -54,7 +54,7 @@ class PaymentController extends Controller
         ]);
 
         // return on balde file with payment detail to pay
-        return view('payment.page', [
+        return view('payment.payment', [
             'plan' => $plan,
             'razorpayKey' => config('services.razorpay.key'),
             'orderId' => $order['id'],
