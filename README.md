@@ -1,35 +1,63 @@
 # SBP
 
-SBP is a Laravel-based subscription plan project with role-based access control.
+SBP is a Laravel subscription billing app with role-based access control, Stripe Checkout, and local payment tracking.
 
-It includes:
+It supports:
 
 - user registration and login
 - admin and user roles
-- plan crud for admins
-- subscription purchase, upgrade, downgrade, renew, and cancel flows for users
-- Stripe Checkout with Laravel Cashier
-- soft delete support for users and plans
+- plan CRUD for admins
+- subscription purchase, upgrade, downgrade, renew, and cancel for users
+- Stripe Checkout through Laravel Cashier
+- invoice download for paid subscriptions
+- soft deletes for users and plans
 - Blade views styled with Tailwind CSS
 
 ## Tech Stack
 
 - Backend: Laravel 13
-- Frontend: Blade
+- PHP: 8.3+
+- Composer: 2.x
 - Database: MySQL
+- Frontend: Blade
 - Styling: Tailwind CSS
+- Payments: Laravel Cashier + Stripe
+
+## Composer Packages and Versions
+
+Main packages used in this project:
+
+- `laravel/framework` `^13.8`
+- `laravel/cashier` `^16.5`
+- `stripe/stripe-php` `^17.3`
+- `laravel/tinker` `^3.0`
+
+Dev packages:
+
+- `fakerphp/faker` `^1.23`
+- `laravel/pail` `^1.2.5`
+- `laravel/pao` `^1.0.6`
+- `laravel/pint` `^1.27`
+- `mockery/mockery` `^1.6`
+- `nunomaduro/collision` `^8.6`
+- `phpunit/phpunit` `^12.5.12`
 
 ## Main Roles
 
-- `admin`
-  - manage plans
-  - view subscribers
-  - block and unblock users
-- `user`
-  - view active plans
-  - subscribe to a plan
-  - update or cancel subscription
-  - pay through Stripe Checkout
+### Admin
+
+- manage plans
+- view all users
+- view subscribers
+- block and unblock users
+
+### User
+
+- view active plans
+- subscribe to a plan
+- upgrade or downgrade a subscription
+- cancel a subscription
+- download invoice PDFs
 
 ## Project Structure
 
@@ -44,25 +72,42 @@ It includes:
 
 ## Payment Flow
 
-The app now uses Stripe Checkout through Laravel Cashier.
+The app uses Stripe Checkout through Laravel Cashier.
 
 1. User selects a plan from the plans page.
-2. The app starts a Stripe Checkout session for the selected Stripe price id.
-3. Stripe opens the checkout page in the browser.
+2. The app creates a Stripe Checkout session for the plan's Stripe price id.
+3. Stripe shows the payment page in the browser.
 4. Stripe redirects back to the app after payment.
-5. The app stores the payment record and updates the subscription.
-6. Stripe webhooks are handled by Cashier at `/stripe/webhook`.
+5. The app stores the local payment record.
+6. The subscription row is updated in the database.
+7. Stripe webhooks are handled by Cashier at `/stripe/webhook`.
 
-Current subscription routes:
+### Subscription Routes
 
 - `POST /subscription/{plan}/store-subscription` - start Stripe checkout
-- `GET /subscription/{plan}/success` - handle the success redirect
-- `GET /subscription/{plan}/cancel` - handle the cancel redirect
+- `GET /subscription/{plan}/success` - handle successful checkout redirect
+- `GET /subscription/{plan}/cancel` - handle canceled checkout redirect
+- `PUT /subscription/{plan}/update-subscription` - update subscription plan
+- `POST /subscription/cancel-subscription` - cancel subscription at period end
+- `GET /subscription/payment/{payment}/download-invoice` - download invoice PDF
 - `POST /stripe/webhook` - Cashier Stripe webhook endpoint
 
-## Environment
+## Database
 
-Add these keys in `.env` for Stripe Cashier:
+The app uses these main tables:
+
+- `users`
+- `roles`
+- `plans`
+- `subscriptions`
+- `subscription_items`
+- `payments`
+
+`subscription_items` is created by Laravel Cashier for subscription line items.
+
+## Stripe Setup
+
+Add these keys to `.env`:
 
 ```env
 STRIPE_KEY=your_stripe_key
@@ -77,9 +122,9 @@ STRIPE_PRODUCT_BASIC_ANNUAL=prod_xxx
 STRIPE_PRODUCT_PRO_ANNUAL=prod_xxx
 ```
 
-The same keys are mapped in `config/services.php`.
+These values are mapped in `config/services.php`.
 
-The app creates the Stripe prices for the demo plans through the Stripe API and attaches them to the Stripe products you already created in the dashboard. You do not need to create the prices manually.
+The plan seeder creates or syncs Stripe prices for the demo plans using the Stripe products you already created in the Stripe Dashboard. You do not need to create the prices manually.
 
 ## Setup
 
@@ -119,34 +164,48 @@ DB_PASSWORD=
 php artisan migrate --seed
 ```
 
-If you only want to sync the Stripe catalog again later, run:
+6. If you want to sync the Stripe plan catalog again later, run:
 
 ```bash
 php artisan stripe:sync-plans
 ```
 
-6. Build frontend assets:
+7. Build frontend assets:
 
 ```bash
 npm run build
 ```
 
-7. Start the app:
+8. Start the app:
 
 ```bash
 php artisan serve
 ```
 
-## Useful Commands
+## Composer Scripts
+
+The project includes these useful Composer scripts:
 
 - `composer setup` - install dependencies, prepare `.env`, migrate, and build assets
 - `composer dev` - run the Laravel server, queue listener, logs, and Vite together
 - `composer test` - clear config cache and run tests
 
+## Seeded Demo Users
+
+The default seeder creates these demo users:
+
+- `testuser1` / `user1@test.com`
+- `testuser2` / `user2@test.com`
+- `testuser3` / `user3@test.com`
+- `Admin` / `admin@gmail.com`
+- `testuser4` / `user4@test.com`
+- `testuser5` / `user5@test.com`
+
 ## Notes
 
-- This app uses role-based middleware for admin and user routes.
+- The app uses role-based middleware for admin and user routes.
 - Plan and subscription rules are handled in the service and repository layers.
 - Soft deletes are used for users and plans.
 - Cashier manages Stripe subscription state, and the app also stores a local payment record for reporting.
-- The plan seeder now creates real Stripe products and price ids before storing the plans locally.
+- Users can download the invoice PDF from the plans page after a payment has a Stripe invoice id.
+- The codebase is written to stay beginner friendly and readable.
