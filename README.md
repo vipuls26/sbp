@@ -209,3 +209,8 @@ The default seeder creates these demo users:
 - Cashier manages Stripe subscription state, and the app also stores a local payment record for reporting.
 - Users can download the invoice PDF from the plans page after a payment has a Stripe invoice id.
 - The codebase is written to stay beginner friendly and readable.
+
+
+## Port forward
+- Run this command of stripe in install in your system otherwise configure with stripe or ngrok
+- stripe listen --forward-to localhost:8000/api/webhooks/stripe
