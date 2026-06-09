@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Interfaces\Auth\UserRepositoryInterface;
 use App\Interfaces\Payment\PaymentRepositoryInterface;
 use App\Models\Payment;
 use App\Services\Payment\PaymentFlowService;
@@ -29,7 +30,7 @@ class WebhookControllerTest extends TestCase
 
         $paymentService = Mockery::mock(PaymentService::class);
         $paymentService->shouldReceive('findBySessionId')
-            ->twice()
+            ->once()
             ->with($sessionId)
             ->andReturn($payment);
         $paymentService->shouldReceive('updateBySessionId')
@@ -58,6 +59,8 @@ class WebhookControllerTest extends TestCase
             ->andReturnUsing(function (callable $callback) {
                 return $callback();
             });
+
+        $userRepository = Mockery::mock(UserRepositoryInterface::class);
 
         $payload = json_encode([
             'type' => 'checkout.session.completed',
@@ -89,7 +92,8 @@ class WebhookControllerTest extends TestCase
             $paymentService,
             $subscriptionService,
             new StripeService(),
-            $paymentRepository
+            $paymentRepository,
+            $userRepository
         );
 
         $response = $service->handleWebhook($request);

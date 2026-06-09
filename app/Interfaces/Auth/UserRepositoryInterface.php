@@ -9,4 +9,7 @@ interface UserRepositoryInterface
 
     // find register user from db
     public function findByEmail(string $email);
+
+    // store Stripe customer id on the user record
+    public function updateStripeCustomerId(int $userId, string $stripeCustomerId);
 }

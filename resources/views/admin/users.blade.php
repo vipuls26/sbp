@@ -63,7 +63,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="text-center py-6 text-gray-500">
+                            <td colspan="5" class="text-center py-6 text-gray-500">
                                 <p> No user found.
 
                                 </p>

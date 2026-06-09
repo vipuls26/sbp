@@ -4,6 +4,8 @@ namespace App\Services\Payment;
 
 use App\Interfaces\Payment\PaymentRepositoryInterface;
 use App\Models\Plan;
+use App\Models\User;
+use App\Interfaces\Auth\UserRepositoryInterface;
 use App\Services\Stripe\StripeService;
 use App\Services\Subscription\SubscriptionService;
 use Illuminate\Http\JsonResponse;
@@ -17,111 +19,36 @@ class PaymentFlowService
         private PaymentService $paymentService,
         private SubscriptionService $subscriptionService,
         private StripeService $stripeService,
-        private PaymentRepositoryInterface $paymentRepository
+        private PaymentRepositoryInterface $paymentRepository,
+        private UserRepositoryInterface $userRepository
     ) {}
 
     // Create a Stripe Checkout session and store a pending payment row.
-    public function createCheckoutSession(Plan $plan, int $subscriberId, string $email): RedirectResponse
+    public function createCheckoutSession(Plan $plan, User $user): RedirectResponse
     {
         try {
+            $customerId = $this->getStripeCustomerId($user);
+
             $session = $this->stripeService->createCheckoutSession(
                 $plan,
-                $subscriberId,
-                url('/payment/success/' . $plan->id . '/{CHECKOUT_SESSION_ID}'),
+                $user->id,
+                $customerId,
+                url('/payment/success/' . $plan->id),
                 route('payments.cancel', $plan),
-                $email
             );
         } catch (\Throwable $e) {
             Log::error('Stripe checkout session could not be created.', [
                 'plan_id' => $plan->id,
-                'user_id' => $subscriberId,
+                'user_id' => $user->id,
                 'error' => $e->getMessage(),
             ]);
 
             return back()->with('error', 'Payment session could not be created. Please try again.');
         }
 
-        $this->paymentService->create([
-            'subscriber_id' => $subscriberId,
-            'plan_id' => $plan->id,
-            'stripe_session_id' => $session['id'],
-            'stripe_payment_intent_id' => null,
-            'stripe_customer_id' => null,
-            'amount' => $plan->pricing,
-            'status' => 'pending',
-            'paid_at' => null,
-        ]);
+        $this->createPendingPayment($plan, $user->id, $session['id']);
 
         return redirect()->away($session['url']);
-    }
-
-    // Handle the browser callback after Stripe Checkout.
-    public function handleSuccess(Plan $plan, string $sessionId): RedirectResponse
-    {
-        abort_if($plan->is_active !== 'true', 404);
-
-        if ($sessionId === '') {
-            return $this->redirectToPlans('error', 'Payment session was not found.');
-        }
-
-        try {
-            $session = $this->stripeService->retrieveCheckoutSession($sessionId);
-        } catch (\Throwable $e) {
-            Log::warning('Stripe checkout session could not be verified.', [
-                'session_id' => $sessionId,
-                'error' => $e->getMessage(),
-            ]);
-
-            return $this->redirectToPlans('error', 'Payment verification failed.');
-        }
-
-        $payment = $this->paymentService->findBySessionId($sessionId);
-
-        if (! $payment) {
-            Log::warning('Stripe payment record not found on success callback.', [
-                'plan_id' => $plan->id,
-                'session_id' => $sessionId,
-            ]);
-
-            return $this->redirectToPlans('error', 'Payment record not found.');
-        }
-
-        if ((int) $payment->plan_id !== (int) $plan->id) {
-            Log::warning('Stripe payment record does not match the selected plan.', [
-                'plan_id' => $plan->id,
-                'payment_plan_id' => $payment->plan_id,
-                'session_id' => $sessionId,
-            ]);
-
-            return $this->redirectToPlans('error', 'Payment record does not match the selected plan.');
-        }
-
-        // The webhook may already have completed the payment.
-        if ($payment->status === 'success') {
-            return $this->redirectToPlans('success', 'Plan subscribe successfully.');
-        }
-
-        if (($session->payment_status ?? null) !== 'paid') {
-            Log::warning('Stripe success callback received but payment is not paid yet.', [
-                'plan_id' => $plan->id,
-                'session_id' => $sessionId,
-                'payment_status' => $session->payment_status ?? null,
-            ]);
-
-            return $this->redirectToPlans('error', 'Payment is not completed yet.');
-        }
-
-        $this->paymentService->updateBySessionId(
-            $sessionId,
-            [
-                'stripe_payment_intent_id' => $session->payment_intent,
-                'stripe_customer_id' => $session->customer,
-                'status' => 'success',
-                'paid_at' => now(),
-            ]
-        );
-
-        return $this->redirectToPlans('success', 'Payment completed successfully.');
     }
 
     // Handle Stripe webhook events and activate the subscription.
@@ -199,11 +126,7 @@ class PaymentFlowService
         }
 
         if ($type === 'checkout.session.expired' || $paymentStatus === 'unpaid') {
-            $this->paymentService->updateBySessionId($sessionId, [
-                'status' => 'failed',
-                'stripe_payment_intent_id' => $paymentIntentId,
-                'stripe_customer_id' => $customerId,
-            ]);
+            $this->markPaymentAsFailed($sessionId, $paymentIntentId, $customerId);
 
             return response()->json([
                 'success' => true,
@@ -225,25 +148,13 @@ class PaymentFlowService
             ]);
         }
 
-        $this->paymentRepository->transaction(function () use ($sessionId, $paymentIntentId, $customerId, $subscriberId, $planId) {
-            $this->paymentService->updateBySessionId($sessionId, [
-                'stripe_payment_intent_id' => $paymentIntentId,
-                'stripe_customer_id' => $customerId,
-                'status' => 'success',
-                'paid_at' => now(),
-            ]);
+        $this->paymentRepository->transaction(function () use ($sessionId, $paymentIntentId, $customerId, $subscriberId, $planId, $payment) {
+            $this->markPaymentAsSuccess($sessionId, $paymentIntentId, $customerId);
 
-            $payment = $this->paymentService->findBySessionId($sessionId);
+            $subscriberId = $subscriberId ?: (int) $payment->subscriber_id;
+            $planId = $planId ?: (int) $payment->plan_id;
 
-            if ($payment) {
-                $subscriberId = $subscriberId ?: (int) $payment->subscriber_id;
-                $planId = $planId ?: (int) $payment->plan_id;
-
-                $this->subscriptionService->update(
-                    $subscriberId,
-                    $planId
-                );
-            }
+            $this->subscriptionService->update($subscriberId, $planId);
         });
 
         return response()->json([
@@ -252,10 +163,53 @@ class PaymentFlowService
         ]);
     }
 
-    private function redirectToPlans(string $type, string $message): RedirectResponse
+    private function createPendingPayment(Plan $plan, int $subscriberId, string $sessionId): void
     {
-        return redirect()
-            ->route('user.plans')
-            ->with($type, $message);
+        $this->paymentService->create([
+            'subscriber_id' => $subscriberId,
+            'plan_id' => $plan->id,
+            'stripe_session_id' => $sessionId,
+            'stripe_payment_intent_id' => null,
+            'stripe_customer_id' => null,
+            'amount' => $plan->pricing,
+            'status' => 'pending',
+            'paid_at' => null,
+        ]);
     }
+
+    private function getStripeCustomerId(User $user): string
+    {
+        if ($user->stripe_customer_id) {
+            return $user->stripe_customer_id;
+        }
+
+        $stripeCustomerId = $this->stripeService->createCustomer($user->name, $user->email);
+
+        $this->userRepository->updateStripeCustomerId($user->id, $stripeCustomerId);
+        $user->forceFill([
+            'stripe_customer_id' => $stripeCustomerId,
+        ]);
+
+        return $stripeCustomerId;
+    }
+
+    private function markPaymentAsSuccess(string $sessionId, mixed $paymentIntentId, mixed $customerId): void
+    {
+        $this->paymentService->updateBySessionId($sessionId, [
+            'stripe_payment_intent_id' => $paymentIntentId,
+            'stripe_customer_id' => $customerId,
+            'status' => 'success',
+            'paid_at' => now(),
+        ]);
+    }
+
+    private function markPaymentAsFailed(string $sessionId, mixed $paymentIntentId, mixed $customerId): void
+    {
+        $this->paymentService->updateBySessionId($sessionId, [
+            'stripe_payment_intent_id' => $paymentIntentId,
+            'stripe_customer_id' => $customerId,
+            'status' => 'failed',
+        ]);
+    }
+
 }

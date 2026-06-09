@@ -15,7 +15,7 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-#[Fillable(['name', 'email', 'password', 'role_id'])]
+#[Fillable(['name', 'email', 'password', 'role_id', 'stripe_customer_id'])]
 #[Hidden(['password', 'remember_token'])]
 // #[ScopedBy([NotAdminUser::class])]
 class User extends Authenticatable

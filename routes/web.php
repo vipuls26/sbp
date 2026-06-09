@@ -80,7 +80,7 @@ Route::prefix('/payment')->middleware('role:user')->group(function () {
     // redirect the user to Stripe Checkout
     Route::get('/checkout/{plan}', [PaymentController::class, 'create'])->name('payments.create');
     // Stripe success page
-    Route::get('/success/{plan}/{session_id}', [PaymentController::class, 'success'])->name('payments.success');
+    Route::get('/success/{plan}', [PaymentController::class, 'success'])->name('payments.success');
     // Stripe cancel page
     Route::get('/cancel/{plan}', [PaymentController::class, 'cancel'])->name('payments.cancel');
 });

@@ -8,7 +8,6 @@ use Illuminate\Support\Facades\DB;
 
 class PaymentRepository implements PaymentRepositoryInterface
 {
-
     // store payment data in the database.
     public function create(array $data)
     {

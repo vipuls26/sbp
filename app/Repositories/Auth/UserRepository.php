@@ -24,4 +24,12 @@ class UserRepository implements UserRepositoryInterface
     {
         return User::where('email', $email)->first();
     }
+
+    // save the Stripe customer id for future checkout sessions
+    public function updateStripeCustomerId(int $userId, string $stripeCustomerId)
+    {
+        return User::whereKey($userId)->update([
+            'stripe_customer_id' => $stripeCustomerId,
+        ]);
+    }
 }

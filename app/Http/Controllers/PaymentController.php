@@ -17,17 +17,21 @@ class PaymentController extends Controller
     {
         abort_if($plan->is_active !== 'true', 404);
 
+        $user = Auth::user();
+        abort_unless($user, 403);
+
         return $this->paymentFlowService->createCheckoutSession(
             $plan,
-            Auth::id(),
-            Auth::user()->email,
+            $user,
         );
     }
 
-    // Stripe redirects back here after checkout.
-    public function success(Plan $plan, string $sessionId)
+    // Stripe redirects back here after checkout, then we send the user to the plans page.
+    public function success(Plan $plan)
     {
-        return $this->paymentFlowService->handleSuccess($plan, $sessionId);
+        return redirect()
+            ->route('user.plans')
+            ->with('success', 'Payment completed successfully.');
     }
 
     // Stripe cancel page helper.

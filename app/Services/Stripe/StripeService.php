@@ -3,6 +3,7 @@
 namespace App\Services\Stripe;
 
 use App\Models\Plan;
+use Stripe\Customer as StripeCustomer;
 use Stripe\Checkout\Session as StripeCheckoutSession;
 use Stripe\Exception\SignatureVerificationException;
 use Stripe\Stripe;
@@ -10,22 +11,33 @@ use Stripe\Webhook;
 
 class StripeService
 {
+    public function createCustomer(string $name, string $email): string
+    {
+        Stripe::setApiKey(config('services.stripe.secret'));
+
+        $customer = StripeCustomer::create([
+            'name' => $name,
+            'email' => $email,
+        ]);
+
+        return $customer->id;
+    }
+
     public function createCheckoutSession(
         Plan $plan,
         int $subscriberId,
+        string $customerId,
         string $successUrl,
         string $cancelUrl,
-        string $email,
     ): array {
         Stripe::setApiKey(config('services.stripe.secret'));
 
         $session = StripeCheckoutSession::create([
             'mode' => 'payment',
-            'customer_creation' => 'always',
+            'customer' => $customerId,
             'success_url' => $successUrl,
             'cancel_url' => $cancelUrl,
             'client_reference_id' => (string) $subscriberId,
-            'customer_email' => (string) $email,
             'line_items' => [
                 [
                     'price_data' => [

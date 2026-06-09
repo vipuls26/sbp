@@ -13,6 +13,6 @@ interface PaymentRepositoryInterface
     // find payment data by Stripe checkout session id
     public function findBySessionId(string $sessionId);
 
-    // run a database transaction from the repository layer
+    // run payment related changes inside a single database transaction
     public function transaction(callable $callback);
 }
