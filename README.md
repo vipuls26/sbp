@@ -8,7 +8,7 @@ It includes:
 - admin and user roles
 - plan crud for admins
 - subscription purchase, upgrade, downgrade, renew, and cancel flows for users
-- Razorpay payment checkout with payment verification
+- Stripe Checkout with webhook-backed payment verification
 - soft delete support for users and plans
 - Blade views styled with Tailwind CSS
 
@@ -29,7 +29,7 @@ It includes:
   - view active plans
   - subscribe to a plan
   - update or cancel subscription
-  - pay through Razorpay checkout
+  - pay through Stripe Checkout
 
 ## Project Structure
 
@@ -48,28 +48,30 @@ The app uses a payment-first flow.
 
 1. User selects a plan from the plans page.
 2. The app creates a pending payment record.
-3. The app creates a Razorpay order.
-4. Razorpay checkout opens in the browser.
-5. Razorpay returns `razorpay_payment_id`, `razorpay_order_id`, and `razorpay_signature`.
-6. The backend verifies the signature.
+3. The app creates a Stripe Checkout session.
+4. Stripe opens the hosted checkout page in the browser.
+5. Stripe returns the user to the success URL and also sends a webhook event.
+6. The backend verifies the webhook signature.
 7. If verification passes, the payment is marked as `success`.
 8. The subscription is then created or updated.
 
 Current payment routes:
 
-- `GET /payment/page/{plan}` - show Razorpay checkout page
-- `POST /payment/make-payment/{plan}` - verify payment and activate subscription
+- `GET /payment/checkout/{plan}` - create a Stripe Checkout session and redirect to Stripe
+- `GET /payment/success/{plan}/{session_id}` - handle the Stripe return URL
+- `GET /payment/cancel/{plan}` - handle a canceled checkout
 
 ## Environment
 
-Add these keys in `.env` for Razorpay:
+Add these keys in `.env` for Stripe:
 
 ```env
-RAZORPAY_KEY_ID=your_key_id
-RAZORPAY_KEY_SECRET=your_key_secret
+STRIPE_KEY=your_stripe_publishable_key
+STRIPE_SECRET=your_stripe_secret_key
+STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret
 ```
 
-The same keys are already mapped in `config/services.php`.
+The same keys are mapped in `config/services.php`.
 
 ## Setup
 

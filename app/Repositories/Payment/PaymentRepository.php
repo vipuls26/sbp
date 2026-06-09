@@ -4,6 +4,7 @@ namespace App\Repositories\Payment;
 
 use App\Interfaces\Payment\PaymentRepositoryInterface;
 use App\Models\Payment;
+use Illuminate\Support\Facades\DB;
 
 class PaymentRepository implements PaymentRepositoryInterface
 {
@@ -14,26 +15,32 @@ class PaymentRepository implements PaymentRepositoryInterface
         return Payment::create([
             'subscriber_id' => $data['subscriber_id'],
             'plan_id' => $data['plan_id'],
-            'razor_order_id' => $data['razor_order_id'],
-            'razor_payment_id' => $data['razor_payment_id'],
-            'razor_signature' => $data['razor_signature'],
+            'stripe_session_id' => $data['stripe_session_id'],
+            'stripe_payment_intent_id' => $data['stripe_payment_intent_id'],
+            'stripe_customer_id' => $data['stripe_customer_id'],
             'amount' => $data['amount'],
             'status' => $data['status'],
             'paid_at' => $data['paid_at'],
         ]);
     }
 
-    // find record by id and update it status
-    public function updateByOrderId(string $orderId, array $data)
+    // find record by checkout session id and update it
+    public function updateBySessionId(string $sessionId, array $data)
     {
-        $payment = Payment::where('razor_order_id', $orderId)->firstOrFail();
+        $payment = Payment::where('stripe_session_id', $sessionId)->firstOrFail();
         $payment->update($data);
         return $payment;
     }
 
-    // fetch a payment record using its Razorpay Order ID.
-    public function findByOrderId(string $orderId)
+    // fetch a payment record using its Stripe checkout session id.
+    public function findBySessionId(string $sessionId)
     {
-        return Payment::where('razor_order_id', $orderId)->first();
+        return Payment::where('stripe_session_id', $sessionId)->first();
+    }
+
+    // run payment related changes inside a single database transaction
+    public function transaction(callable $callback)
+    {
+        return DB::transaction($callback);
     }
 }

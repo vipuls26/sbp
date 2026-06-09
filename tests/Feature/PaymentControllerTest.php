@@ -2,120 +2,117 @@
 
 namespace Tests\Feature;
 
-use App\Http\Controllers\PaymentController;
-use App\Http\Requests\Payment\PaymentRequest;
+use App\Interfaces\Payment\PaymentRepositoryInterface;
 use App\Models\Payment;
 use App\Models\Plan;
 use App\Services\Payment\PaymentService;
-use App\Services\Razorpay\RazorpayApiService;
+use App\Services\Payment\PaymentFlowService;
+use App\Services\Stripe\StripeService;
+use App\Services\Subscription\SubscriptionService;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\View\View;
 use Mockery;
+use Stripe\Checkout\Session as StripeCheckoutSession;
 use Tests\TestCase;
 
 class PaymentControllerTest extends TestCase
 {
-    public function test_create_shows_payment_page_and_saves_pending_payment(): void
+    public function test_create_stores_pending_payment_and_redirects_to_stripe(): void
     {
-        Config::set('services.razorpay.key', 'rzp_test_key');
-
-        Auth::shouldReceive('id')
-            ->twice()
-            ->andReturn(7);
-
         $plan = $this->makePlan();
-        $order = ['id' => 'order_test_123'];
+        $session = [
+            'id' => 'cs_test_123',
+            'url' => 'https://checkout.stripe.com/pay/cs_test_123',
+        ];
 
         $paymentService = Mockery::mock(PaymentService::class);
         $paymentService->shouldReceive('create')
             ->once()
             ->with(Mockery::on(function (array $data) use ($plan) {
                 return $data['subscriber_id'] === 7
-                    && $data['plan_id'] === 1
-                    && $data['razor_order_id'] === 'order_test_123'
-                    && $data['amount'] === $plan->pricing
+                    && $data['plan_id'] === $plan->id
+                    && $data['stripe_session_id'] === 'cs_test_123'
                     && $data['status'] === 'pending';
             }))
             ->andReturn(new Payment());
 
-        $razorpayApiService = Mockery::mock(RazorpayApiService::class);
-        $razorpayApiService->shouldReceive('createOrder')
+        $stripeService = Mockery::mock(StripeService::class);
+        $stripeService->shouldReceive('createCheckoutSession')
             ->once()
-            ->with(Mockery::on(function (array $data) use ($plan) {
-                return str_starts_with($data['receipt'], 'plan_1_7_')
-                    && $data['amount'] === (int) round($plan->pricing * 100)
-                    && $data['currency'] === 'INR';
-            }))
-            ->andReturn($order);
+            ->andReturn($session);
 
-        $controller = new PaymentController(
+        $subscriptionService = Mockery::mock(SubscriptionService::class);
+        $paymentRepository = Mockery::mock(PaymentRepositoryInterface::class);
+
+        $service = new PaymentFlowService(
             $paymentService,
-            $razorpayApiService
+            $subscriptionService,
+            $stripeService,
+            $paymentRepository
         );
 
-        $view = $controller->create($plan);
+        $response = $service->createCheckoutSession(
+            $plan,
+            7,
+            'user@example.com'
+        );
 
-        $this->assertInstanceOf(View::class, $view);
-        $this->assertSame('payment.payment', $view->name());
-        $this->assertSame('order_test_123', $view->getData()['orderId']);
-        $this->assertSame((int) round($plan->pricing * 100), $view->getData()['amount']);
-        $this->assertSame('INR', $view->getData()['currency']);
-        $this->assertSame('rzp_test_key', $view->getData()['razorpayKey']);
+        $this->assertInstanceOf(RedirectResponse::class, $response);
     }
 
-    public function test_store_verifies_signature_and_keeps_payment_pending(): void
+    public function test_success_marks_payment_paid_and_updates_subscription(): void
     {
         $plan = $this->makePlan();
-        $orderId = 'order_test_456';
-        $paymentId = 'pay_test_456';
-        $signature = hash_hmac('sha256', $orderId . '|' . $paymentId, 'rzp_test_secret');
+        $sessionId = 'cs_test_456';
 
-        $validatedRequest = Mockery::mock(PaymentRequest::class);
-        $validatedRequest->shouldReceive('validated')
-            ->once()
-            ->andReturn([
-                'razorpay_payment_id' => $paymentId,
-                'razorpay_order_id' => $orderId,
-                'razorpay_signature' => $signature,
-            ]);
+        $stripeSession = StripeCheckoutSession::constructFrom([
+            'id' => $sessionId,
+            'payment_status' => 'paid',
+            'payment_intent' => 'pi_test_456',
+            'customer' => 'cus_test_456',
+        ]);
 
-        $pendingPayment = new Payment();
-        $pendingPayment->forceFill([
+        $payment = new Payment();
+        $payment->forceFill([
+            'subscriber_id' => 7,
+            'plan_id' => $plan->id,
+            'stripe_session_id' => $sessionId,
             'status' => 'pending',
-            'razor_signature' => null,
         ]);
 
         $paymentService = Mockery::mock(PaymentService::class);
-        $paymentService->shouldReceive('findByOrderId')
+        $paymentService->shouldReceive('findBySessionId')
             ->once()
-            ->with($orderId)
-            ->andReturn($pendingPayment);
-        $paymentService->shouldReceive('updateByOrderId')
+            ->with($sessionId)
+            ->andReturn($payment);
+        $paymentService->shouldReceive('updateBySessionId')
             ->once()
-            ->with($orderId, [
-                'razor_signature' => $signature,
-            ]);
-        $razorpayApiService = Mockery::mock(RazorpayApiService::class);
-        $razorpayApiService->shouldReceive('verifyPaymentSignature')
-            ->once()
-            ->with([
-                'razorpay_payment_id' => $paymentId,
-                'razorpay_order_id' => $orderId,
-                'razorpay_signature' => $signature,
-            ]);
+            ->with($sessionId, Mockery::on(function (array $data) {
+                return $data['stripe_payment_intent_id'] === 'pi_test_456'
+                    && $data['stripe_customer_id'] === 'cus_test_456'
+                    && $data['status'] === 'success'
+                    && $data['paid_at'] instanceof \Illuminate\Support\Carbon;
+            }));
 
-        $controller = new PaymentController(
+        $stripeService = Mockery::mock(StripeService::class);
+        $stripeService->shouldReceive('retrieveCheckoutSession')
+            ->once()
+            ->with($sessionId)
+            ->andReturn($stripeSession);
+
+        $subscriptionService = Mockery::mock(SubscriptionService::class);
+        $paymentRepository = Mockery::mock(PaymentRepositoryInterface::class);
+
+        $service = new PaymentFlowService(
             $paymentService,
-            $razorpayApiService
+            $subscriptionService,
+            $stripeService,
+            $paymentRepository
         );
 
-        $response = $controller->store($validatedRequest, $plan);
+        $response = $service->handleSuccess($plan, $sessionId);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
         $this->assertSame(route('user.plans'), $response->getTargetUrl());
-        $this->assertSame('Payment received successfully.', $response->getSession()->get('success'));
     }
 
     private function makePlan(): Plan

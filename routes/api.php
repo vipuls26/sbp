@@ -1,11 +1,12 @@
 <?php
 
-use App\Http\Controllers\WebhookController;
+use App\Http\Controllers\StripewebhookController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/webhooks/razorpay', function () {
-    return response()->json(['message' => 'Razorpay webhook endpoint is ready']);
+Route::get('/webhooks/stripe', function () {
+    return response()->json(['message' => 'Stripe webhook endpoint is ready']);
 });
 
-// Razorpay sends webhook events here.
-Route::post('/webhooks/razorpay', [WebhookController::class, 'handle']);
+// Stripe sends webhook events here.
+Route::post('/webhooks/stripe', [StripewebhookController::class, 'handle']);
+

@@ -4,7 +4,6 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PlanController;
-use App\Http\Controllers\StripeController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -78,20 +77,10 @@ Route::prefix('/subscription')->middleware('role:user')->group(function () {
 
 
 Route::prefix('/payment')->middleware('role:user')->group(function () {
-    // show payment page
-    Route::get('/payment/{plan}', [PaymentController::class, 'create'])->name('payments.create');
-    // add payment
-    Route::post('/make-payment/{plan}', [PaymentController::class, 'store'])->name('payments.store');
+    // redirect the user to Stripe Checkout
+    Route::get('/checkout/{plan}', [PaymentController::class, 'create'])->name('payments.create');
+    // Stripe success page
+    Route::get('/success/{plan}/{session_id}', [PaymentController::class, 'success'])->name('payments.success');
+    // Stripe cancel page
+    Route::get('/cancel/{plan}', [PaymentController::class, 'cancel'])->name('payments.cancel');
 });
-
-
-
-
-// Stripe
-Route::get('/stripe/test', [StripeController::class, 'test']);
-
-Route::get('/stripe/checkout', [StripeController::class, 'checkout']);
-
-Route::get('/stripe/success', function () {
-    return 'Payment Success';
-})->name('stripe.success');

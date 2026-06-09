@@ -27,23 +27,12 @@
                                 Choose Plan
                             </a>
                         @elseif ($plan->id != $subscription->plan_id)
-                            <form action="{{ route('subscriptions.update', $plan->id) }}" method="POST">
-                                @csrf
-                                @method('PUT')
-
-                                @if ($plan->pricing > $subscription->plan->pricing)
-                                    <button
-                                        class="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md">
-                                        Upgrade plan
-                                    </button>
-                                @else
-                                    <button
-                                        class="w-full mt-6 bg-orange-600 hover:bg-orange-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md">
-                                        Downgrade plan
-                                    </button>
-                                @endif
-
-                            </form>
+                            <a href="{{ route('payments.create', $plan) }}"
+                                class="block w-full mt-6 text-center font-semibold py-3 px-6 rounded-lg shadow-md
+                                    {{ $plan->pricing > $subscription->plan->pricing ? 'bg-blue-600 hover:bg-blue-700' : 'bg-orange-600 hover:bg-orange-700' }}
+                                    text-white">
+                                {{ $plan->pricing > $subscription->plan->pricing ? 'Upgrade plan' : 'Downgrade plan' }}
+                            </a>
                         @else
                             <div class="gap-2">
                                 <button

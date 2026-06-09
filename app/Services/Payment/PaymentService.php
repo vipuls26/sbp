@@ -15,7 +15,7 @@ class PaymentService
 
     /**
      * Create a new payment record in the database.
-     * This is usually called right before we open the Razorpay popup.
+     * This is called before we redirect the user to Stripe Checkout.
      * 
      * @param array $data The payment details like amount, plan_id, etc.
      */
@@ -25,27 +25,25 @@ class PaymentService
     }
 
     /**
-     * Update an existing payment record using the Razorpay Order ID.
-     * This is useful when Razorpay responds back after a success or failure,
-     * so we can update the status (e.g. from 'pending' to 'success').
+     * Update an existing payment record using the Stripe Checkout session id.
      * 
-     * @param string $orderId The Razorpay order ID we got earlier.
+     * @param string $sessionId The Stripe Checkout session id we got earlier.
      * @param array $data The new data to update (like signature, payment id).
      */
-    public function updateByOrderId(string $orderId, array $data)
+    public function updateBySessionId(string $sessionId, array $data)
     {
-        return $this->paymentRepositoryInterface->updateByOrderId($orderId, $data);
+        return $this->paymentRepositoryInterface->updateBySessionId($sessionId, $data);
     }
 
     /**
-     * Find a payment record by its Razorpay Order ID.
-     * We use this to check if a pending payment actually exists 
+     * Find a payment record by its Stripe Checkout session id.
+     * We use this to check if a pending payment actually exists
      * before we try to verify the final payment.
      * 
-     * @param string $orderId The Razorpay order ID.
+     * @param string $sessionId The Stripe Checkout session id.
      */
-    public function findByOrderId(string $orderId)
+    public function findBySessionId(string $sessionId)
     {
-        return $this->paymentRepositoryInterface->findByOrderId($orderId);
+        return $this->paymentRepositoryInterface->findBySessionId($sessionId);
     }
 }

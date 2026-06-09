@@ -31,8 +31,9 @@ class SubscriptionController extends Controller
     {
         abort_if($plan->is_active !== 'true', 404);
 
-        $this->subscriptionService->update(Auth::id(), $plan->id);
-        return redirect()->route('user.plans')->with('success', 'Subscription Updated Successfully');
+        return redirect()
+            ->route('payments.create', $plan)
+            ->with('success', 'Please complete the payment to activate your selected plan.');
     }
 
     // cancel subscription
