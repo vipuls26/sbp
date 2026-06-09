@@ -17,6 +17,8 @@ class PlanRepository implements PlanRepositoryInterface
             'description' => $data['description'],
             'pricing' => $data['pricing'],
             'duration' => $data['duration'],
+            'stripe_price_id' => $data['stripe_price_id'],
+            'stripe_product_id' => $data['stripe_product_id'] ?? null,
             'admin_id' => Auth::id(),
         ]);
     }
@@ -47,15 +49,24 @@ class PlanRepository implements PlanRepositoryInterface
     // update a plan record
     public function update(int $id, array $data)
     {
-        return Plan::updateOrCreate(
-            ['id' => $id],
-            [
-                'name' => $data['name'],
-                'description' => $data['description'],
-                'pricing' => $data['pricing'],
-                'duration' => $data['duration'],
-            ]
-        );
+        $plan = Plan::findOrFail($id);
+
+        $payload = [
+            'name' => $data['name'],
+            'description' => $data['description'],
+            'pricing' => $data['pricing'],
+            'duration' => $data['duration'],
+            'stripe_price_id' => $data['stripe_price_id'],
+        ];
+
+        // Keep the existing Stripe product id unless the caller sends a new one.
+        if (array_key_exists('stripe_product_id', $data)) {
+            $payload['stripe_product_id'] = $data['stripe_product_id'];
+        }
+
+        $plan->update($payload);
+
+        return $plan;
     }
 
     // delete a plan record

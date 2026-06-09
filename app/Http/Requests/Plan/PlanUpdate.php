@@ -50,6 +50,13 @@ class PlanUpdate extends FormRequest
                 'required',
                 'in:monthly,annual',
             ],
+
+            'stripe_price_id' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('plans', 'stripe_price_id')->ignore($plan->id),
+            ],
         ];
     }
 
@@ -72,6 +79,12 @@ class PlanUpdate extends FormRequest
             // plan duration
             'duration.required' => 'Plan duration is required',
             'duration.in' => 'Plan duration must be either "monthly" or "annual"',
+
+            // stripe price
+            'stripe_price_id.required' => 'Stripe price id is required',
+            'stripe_price_id.string' => 'Stripe price id must be a string',
+            'stripe_price_id.max' => 'Stripe price id may not be greater than 255 characters',
+            'stripe_price_id.unique' => 'Stripe price id already exists',
         ];
     }
 }

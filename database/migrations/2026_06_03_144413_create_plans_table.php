@@ -18,6 +18,7 @@ return new class extends Migration
             $table->decimal('pricing', 10, 2);
             $table->enum('duration', ['monthly', 'annual']);
             $table->enum('is_active', ['true', 'false'])->default('true');
+            $table->string('stripe_price_id')->unique();
             $table->foreignId('admin_id')->constrained('users')->cascadeOnDelete();
             $table->timestamps();
 

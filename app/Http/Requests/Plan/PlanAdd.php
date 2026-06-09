@@ -27,6 +27,7 @@ class PlanAdd extends FormRequest
             'description' => ['nullable', 'string'],
             'pricing' => ['required', 'numeric', 'min:0'],
             'duration' => ['required', 'in:monthly,annual'],
+            'stripe_price_id' => ['required', 'string', 'max:255', 'unique:plans,stripe_price_id'],
             'is_active' => ['sometimes', 'boolean'],
         ];
     }
@@ -51,6 +52,12 @@ class PlanAdd extends FormRequest
             // plan duration
             'duration.required' => 'Plan duration is required',
             'duration.in' => 'Plan duration must be either "monthly" or "annual"',
+
+            // stripe price
+            'stripe_price_id.required' => 'Stripe price id is required',
+            'stripe_price_id.string' => 'Stripe price id must be a string',
+            'stripe_price_id.max' => 'Stripe price id may not be greater than 255 characters',
+            'stripe_price_id.unique' => 'Stripe price id already exists',
         ];
     }
 }

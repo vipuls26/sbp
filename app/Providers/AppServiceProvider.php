@@ -13,6 +13,8 @@ use App\Repositories\Payment\PaymentRepository;
 use App\Repositories\Plan\PlanRepository;
 use App\Repositories\Subscription\SubscriptionRepository;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Cashier\Cashier;
+use App\Models\Subscription;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -33,6 +35,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        Cashier::useSubscriptionModel(Subscription::class);
     }
 }

@@ -14,57 +14,32 @@ class DatabaseSeeder extends Seeder
 
     public function run(): void
     {
+        // Seed roles first so users can reference them.
         $this->call([RoleSeeder::class]);
 
-        // user1
-        User::factory()->create([
-            'name' => 'user1',
-            'email' => 'user1@gmail.com',
-            'password' => 'password',
-            'role_id' => 1
-        ]);
+        $userRoleId = Role::where('name', 'user')->value('id');
+        $adminRoleId = Role::where('name', 'admin')->value('id');
 
-        // user2
-        User::factory()->create([
-            'name' => 'user2',
-            'email' => 'user2@gmail.com',
-            'password' => 'password',
-            'role_id' => 1
-        ]);
+        // Keep demo users stable across repeated seed runs.
+        $users = [
+            ['name' => 'testuser1', 'email' => 'user1@test.com', 'role_id' => $userRoleId],
+            ['name' => 'testuser2', 'email' => 'user2@test.com', 'role_id' => $userRoleId],
+            ['name' => 'testuser3', 'email' => 'user3@test.com', 'role_id' => $userRoleId],
+            ['name' => 'Admin', 'email' => 'admin@gmail.com', 'role_id' => $adminRoleId],
+            ['name' => 'testuser4', 'email' => 'user4@test.com', 'role_id' => $userRoleId],
+            ['name' => 'testuser5', 'email' => 'user5@test.com', 'role_id' => $userRoleId],
+        ];
 
-        // user3
-        User::factory()->create([
-            'name' => 'user3',
-            'email' => 'user3@gmail.com',
-            'password' => 'password',
-            'role_id' => 1
-        ]);
-
-
-        // admin user
-        User::factory()->create([
-            'name' => 'admin',
-            'email' => 'admin@gmail.com',
-            'password' => 'password',
-            'role_id' => 2
-        ]);
-
-
-        // user4
-        User::factory()->create([
-            'name' => 'user4',
-            'email' => 'user4@gmail.com',
-            'password' => 'password',
-            'role_id' => 1
-        ]);
-
-        // user5
-        User::factory()->create([
-            'name' => 'user5',
-            'email' => 'user5@gmail.com',
-            'password' => 'password',
-            'role_id' => 1
-        ]);
+        foreach ($users as $userData) {
+            User::updateOrCreate(
+                ['email' => $userData['email']],
+                [
+                    'name' => $userData['name'],
+                    'password' => 'password',
+                    'role_id' => $userData['role_id'],
+                ]
+            );
+        }
 
         $this->call([PlanSeeder::class]);
     }

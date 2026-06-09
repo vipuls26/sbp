@@ -10,15 +10,14 @@ class SubscriptionRepository implements SubscriptionRepositoryInterface
     // add subscription
     public function create(array $data)
     {
-        $subscription = Subscription::create($data);
-        return $subscription;
+        return Subscription::create($data);
     }
 
     // update subscription
-    public function update(int $subscriberId, array $data)
+    public function update(int $userId, array $data)
     {
         $subscription = Subscription::updateOrCreate(
-            ['subscriber_id' => $subscriberId],
+            ['user_id' => $userId],
             $data
         );
 
@@ -26,8 +25,16 @@ class SubscriptionRepository implements SubscriptionRepositoryInterface
     }
 
     // cancel subscription
-    public function cancel(int $subscriberId)
+    public function cancel(int $userId, array $data = [])
     {
-        return Subscription::where('subscriber_id', $subscriberId)->delete();
+        $subscription = Subscription::where('user_id', $userId)->first();
+
+        if (! $subscription) {
+            return null;
+        }
+
+        $subscription->update($data);
+
+        return $subscription;
     }
 }

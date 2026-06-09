@@ -8,8 +8,8 @@ interface SubscriptionRepositoryInterface
     public function create(array $data);
 
     // update subscription
-    public function update(int $subscriberId, array $data);
+    public function update(int $userId, array $data);
 
     // cancel subscription
-    public function cancel(int $subscriberId);
+    public function cancel(int $userId, array $data = []);
 }

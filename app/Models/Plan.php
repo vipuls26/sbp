@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 
-#[Fillable(['name', 'description', 'pricing', 'duration', 'is_active', 'admin_id'])]
+#[Fillable(['name', 'description', 'pricing', 'duration', 'is_active', 'admin_id', 'stripe_price_id', 'stripe_product_id'])]
 class Plan extends Model
 {
     use SoftDeletes;
@@ -35,7 +35,7 @@ class Plan extends Model
         }
 
         $query->whereDoesntHave('subscriptions', function ($query) {
-            $query->where('subscriber_id', Auth::id());
+            $query->where('user_id', Auth::id());
         });
     }
 
@@ -48,7 +48,7 @@ class Plan extends Model
         }
 
         $query->whereHas('subscriptions', function ($query) {
-            $query->where('subscriber_id', Auth::id());
+            $query->where('user_id', Auth::id());
             $query->where('end_date', '>', now());
         });
     }

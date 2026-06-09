@@ -2,29 +2,26 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Scope;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
+use Laravel\Cashier\Subscription as CashierSubscription;
 
-#[Fillable(['plan_id', 'subscriber_id', 'start_date', 'end_date', 'status'])]
-class Subscription extends Model
+class Subscription extends CashierSubscription
 {
-    // subscription belongs to the subscriber
+    // subscription belongs to the subscriber in our app
     public function subscriber()
     {
-        return $this->belongsTo(User::class, 'subscriber_id');
+        return $this->belongsTo(User::class, 'user_id');
     }
 
-    // subscription belongs to a plan
+    // plan belongs to the selected package
     public function plan()
     {
         return $this->belongsTo(Plan::class);
     }
 
-
-    // logged-in use subscription
+    // logged-in user subscription
     #[Scope]
     protected function activeSubscription(Builder $query): void
     {
@@ -32,12 +29,11 @@ class Subscription extends Model
             return;
         }
 
-        $query->where('subscriber_id', Auth::id())
+        $query->where('user_id', Auth::id())
             ->where('end_date', '>', now());
     }
 
-
-    // subscription expried
+    // subscription expired near by date
     #[Scope]
     protected function expireSubscription(Builder $query, int $days): Builder
     {

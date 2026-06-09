@@ -13,26 +13,17 @@ return new class extends Migration
     {
         Schema::create('payments', function (Blueprint $table) {
             $table->id();
-            // subscriber id
-            $table->foreignId('subscriber_id')->constrained('users')->cascadeOnDelete();
-            // plan id
-            $table->foreignId('plan_id')->constrained('plans')->cascadeOnDelete();
-
-            // create order id when payment start
-            $table->string('razor_order_id')->nullable();
-
-            // payment id 
-            $table->string('razor_payment_id')->nullable();
-
-            // verify if payment is genuie
-            $table->string('razor_signature')->nullable();
-
+            $table->foreignId('user_id')->nullable()->constrained('users')->cascadeOnDelete();
+            $table->foreignId('subscriber_id')->nullable()->constrained('users')->cascadeOnDelete();
+            $table->foreignId('plan_id')->nullable()->constrained('plans')->nullOnDelete();
+            $table->string('stripe_checkout_session_id')->nullable()->unique();
+            $table->string('stripe_payment_intent_id')->nullable();
+            $table->string('stripe_subscription_id')->nullable();
+            $table->string('stripe_customer_id')->nullable();
+            $table->string('currency', 10)->default('INR');
             $table->decimal('amount', 10, 2);
-
-            $table->enum('status', ['pending','success','failed'])->default('pending');
-
+            $table->enum('status', ['pending', 'success', 'failed'])->default('pending');
             $table->timestamp('paid_at')->nullable();
-
             $table->timestamps();
         });
     }

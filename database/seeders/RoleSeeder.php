@@ -9,10 +9,12 @@ class RoleSeeder extends Seeder
 {
     public function run(): void
     {
-        Role::insert([
-            ['name' => 'user', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'admin', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'other', 'created_at' => now(), 'updated_at' => now()],
-        ]);
+        // Keep role seeding safe to run more than once.
+        foreach (['user', 'admin', 'other'] as $roleName) {
+            Role::updateOrCreate(
+                ['name' => $roleName],
+                ['name' => $roleName]
+            );
+        }
     }
 }

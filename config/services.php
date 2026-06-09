@@ -35,9 +35,18 @@ return [
         ],
     ],
 
-    'razorpay' => [
-        'key' => env('RAZORPAY_KEY_ID'),
-        'secret' => env('RAZORPAY_KEY_SECRET'),
-        'webhook_secret' => env('RAZORPAY_WEBHOOK_SECRET'),
+    'stripe' => [
+        'key' => env('STRIPE_KEY'),
+        'secret' => env('STRIPE_SECRET'),
+        'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),
+        'currency' => env('STRIPE_CURRENCY', 'inr'),
+        'plan_product_ids' => [
+            'hobby_monthly' => env('STRIPE_PRODUCT_HOBBY_MONTHLY'),
+            'basic_monthly' => env('STRIPE_PRODUCT_BASIC_MONTHLY'),
+            'pro_monthly' => env('STRIPE_PRODUCT_PRO_MONTHLY'),
+            'hobby_annual' => env('STRIPE_PRODUCT_HOBBY_ANNUAL'),
+            'basic_annual' => env('STRIPE_PRODUCT_BASIC_ANNUAL'),
+            'pro_annual' => env('STRIPE_PRODUCT_PRO_ANNUAL'),
+        ],
     ],
 ];

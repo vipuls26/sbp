@@ -14,6 +14,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Laravel\Cashier\Billable;
 
 #[Fillable(['name', 'email', 'password', 'role_id'])]
 #[Hidden(['password', 'remember_token'])]
@@ -21,12 +22,13 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class User extends Authenticatable
 {
 
-    use HasFactory, Notifiable, SoftDeletes;
+    use Billable, HasFactory, Notifiable, SoftDeletes;
     protected function casts(): array
     {
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'trial_ends_at' => 'datetime',
         ];
     }
 
@@ -39,12 +41,6 @@ class User extends Authenticatable
     public function plans()
     {
         return $this->hasMany(Plan::class, 'admin_id');
-    }
-
-    // user has one active subscription
-    public function subscription()
-    {
-        return $this->hasOne(Subscription::class, 'subscriber_id');
     }
 
     // only user with user role

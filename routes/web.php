@@ -2,7 +2,6 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PlanController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\UserController;
@@ -69,16 +68,12 @@ Route::prefix('/subscription')->middleware('role:user')->group(function () {
     // add subscription
     Route::get('/subscription', [SubscriptionController::class, 'index'])->name('subscriptions.index');
     Route::post('/{plan}/store-subscription', [SubscriptionController::class, 'store'])->name('subscriptions.store');
+    Route::get('/{plan}/success', [SubscriptionController::class, 'success'])->name('subscriptions.success');
+    Route::get('/{plan}/cancel', [SubscriptionController::class, 'cancel'])->name('subscriptions.cancel');
     // update subscription
     Route::put('/{plan}/update-subscription', [SubscriptionController::class, 'update'])->name('subscriptions.update');
     // cancel subscription
     Route::post('/cancel-subscription', [SubscriptionController::class, 'destroy'])->name('subscriptions.destroy');
-});
-
-
-Route::prefix('/payment')->middleware('role:user')->group(function () {
-    // show payment page
-    Route::get('/payment/{plan}', [PaymentController::class, 'create'])->name('payments.create');
-    // add payment
-    Route::post('/make-payment/{plan}', [PaymentController::class, 'store'])->name('payments.store');
+    // download invoice
+    Route::get('/payment/{payment}/download-invoice', [SubscriptionController::class, 'downloadInvoice'])->name('subscriptions.invoice.download');
 });

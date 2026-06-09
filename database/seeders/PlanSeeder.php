@@ -3,8 +3,10 @@
 namespace Database\Seeders;
 
 use App\Models\Plan;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\User;
+use App\Services\Stripe\StripePlanCatalogService;
 use Illuminate\Database\Seeder;
+use InvalidArgumentException;
 
 class PlanSeeder extends Seeder
 {
@@ -13,16 +15,30 @@ class PlanSeeder extends Seeder
      */
     public function run(): void
     {
-        Plan::insert([
-            // monthly plan
-            ['name' => 'Hobby', 'description' => 'Perfect for individuals and beginners.', 'pricing' => 49, 'duration' => 'monthly', 'admin_id' => 4, 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'Basic', 'description' => 'Best for small projects.', 'pricing' => 149, 'duration' => 'monthly', 'admin_id' => 4, 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'Pro', 'description' => 'Limited access to feature', 'pricing' => 499, 'duration' => 'monthly', 'admin_id' => 4, 'created_at' => now(), 'updated_at' => now()],
+        $adminId = User::where('email', 'admin@gmail.com')->value('id');
 
-            // annual plan
-            ['name' => 'Hobby', 'description' => 'Perfect for individuals and beginners.', 'pricing' => 599, 'duration' => 'annual', 'admin_id' => 4, 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'Basic', 'description' => 'Best for small projects.', 'pricing' => 1499, 'duration' => 'annual', 'admin_id' => 4, 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'Pro', 'description' => 'Unlimited access to feature', 'pricing' => 2999, 'duration' => 'annual', 'admin_id' => 4, 'created_at' => now(), 'updated_at' => now()],
-        ]);
+        if (! $adminId) {
+            throw new InvalidArgumentException('Admin user not found. Seed roles and users first.');
+        }
+
+        $stripePlans = app(StripePlanCatalogService::class)->sync();
+
+        foreach ($stripePlans as $plan) {
+            Plan::updateOrCreate(
+                [
+                    'name' => $plan['name'],
+                    'duration' => $plan['duration'],
+                ],
+                [
+                    'description' => $plan['description'],
+                    'pricing' => $plan['pricing'],
+                    'duration' => $plan['duration'],
+                    'stripe_price_id' => $plan['stripe_price_id'],
+                    'stripe_product_id' => $plan['stripe_product_id'],
+                    'admin_id' => $adminId,
+                    'is_active' => 'true',
+                ]
+            );
+        }
     }
 }

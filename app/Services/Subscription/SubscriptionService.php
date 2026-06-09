@@ -4,38 +4,14 @@ namespace App\Services\Subscription;
 
 use App\Interfaces\Subscription\SubscriptionRepositoryInterface;
 use App\Models\Plan;
-use Illuminate\Support\Facades\Auth;
-
-
 class SubscriptionService
 {
     public function __construct(
         private SubscriptionRepositoryInterface $subscriptionRepositoryInterface
     ) {}
 
-    // create subscription
-    public function create(Plan $plan)
-    {
-        $user = Auth::user();
-        $startDate = now()->toDateTimeString();
-        $endDate = $plan->duration === 'annual'
-            ? now()->addYear()->toDateTimeString()
-            : now()->addDays(30)->toDateTimeString();
-
-        $subscription = $this->subscriptionRepositoryInterface->create(
-            [
-                'plan_id' => $plan->id,
-                'subscriber_id' => $user->id,
-                'start_date' => $startDate,
-                'end_date' => $endDate,
-            ]
-        );
-
-        return $subscription;
-    }
-
     // update subscription
-    public function update(int $subscriberId, int $planId)
+    public function update(int $userId, int $planId, array $extra = [])
     {
         $plan = Plan::findOrFail($planId);
 
@@ -45,21 +21,29 @@ class SubscriptionService
 
         // update subscription data
         $data = [
+            'user_id' => $userId,
             'plan_id' => $plan->id,
-            'start_date' => now()->toDateTimeString(),
-            'end_date' => $plan->duration === 'annual'
+            'subscriber_id' => $userId,
+            'type' => 'default',
+            'stripe_price' => $plan->stripe_price_id,
+            'stripe_status' => $extra['stripe_status'] ?? 'active',
+            'quantity' => $extra['quantity'] ?? 1,
+            'stripe_id' => $extra['stripe_id'] ?? null,
+            'start_date' => $extra['start_date'] ?? now()->toDateTimeString(),
+            'end_date' => $extra['end_date'] ?? ($plan->duration === 'annual'
                 ? now()->addYear()->toDateTimeString()
-                : now()->addDays(30)->toDateTimeString(),
+                : now()->addDays(30)->toDateTimeString()),
+            'status' => $extra['status'] ?? 'active',
         ];
 
-        $subscription = $this->subscriptionRepositoryInterface->update($subscriberId, $data);
+        $subscription = $this->subscriptionRepositoryInterface->update($userId, $data);
 
         return $subscription;
     }
 
     // cancel subscription
-    public function cancel(int $subscriberId)
+    public function cancel(int $userId, array $extra = [])
     {
-        return $this->subscriptionRepositoryInterface->cancel($subscriberId);
+        return $this->subscriptionRepositoryInterface->cancel($userId, $extra);
     }
 }

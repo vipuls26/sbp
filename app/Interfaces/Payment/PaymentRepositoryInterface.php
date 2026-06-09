@@ -7,9 +7,6 @@ interface PaymentRepositoryInterface
     // store payment data
     public function create(array $data);
 
-    // update payment data by Razorpay order id
-    public function updateByOrderId(string $orderId, array $data);
-
-    // find payment data by Razorpay order id
-    public function findByOrderId(string $orderId);
+    // create or update payment data by Stripe checkout session id
+    public function updateOrCreateByStripeSessionId(string $sessionId, array $data);
 }
