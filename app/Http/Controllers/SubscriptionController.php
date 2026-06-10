@@ -298,7 +298,7 @@ class SubscriptionController extends Controller
 
     public function downloadInvoice()
     {
-            $payment = Payment::where('user_id', auth()->id())
+            $payment = Payment::where('user_id', Auth::id())
                 ->whereNotNull('stripe_invoice_id')
                 ->latest()
                 ->first();
@@ -308,7 +308,7 @@ class SubscriptionController extends Controller
             }
 
             try {
-                $invoiceUrl = auth()->user()->stripe()->invoices->retrieve($payment->stripe_invoice_id)->hosted_invoice_url;
+                $invoiceUrl = Auth::user()->stripe()->invoices->retrieve($payment->stripe_invoice_id)->hosted_invoice_url;
 
                 if (! $invoiceUrl) {
                     return redirect()->route('user.payment-history')->with('error', 'Invoice URL not found.');
