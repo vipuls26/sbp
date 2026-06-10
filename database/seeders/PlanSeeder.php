@@ -18,12 +18,37 @@ class PlanSeeder extends Seeder
         $adminId = User::where('email', 'admin@gmail.com')->value('id');
 
         if (! $adminId) {
-            throw new InvalidArgumentException('Admin user not found. Seed roles and users first.');
+            throw new InvalidArgumentException(
+                'Admin user not found. Seed roles and users first.'
+            );
         }
 
         $stripePlans = app(StripePlanCatalogService::class)->sync();
 
         foreach ($stripePlans as $plan) {
+
+            $features = match (strtolower($plan['name'])) {
+                'hobby' => [
+                    'project' => true,
+                    'team_management' => false,
+                    'analytics' => false,
+                ],
+
+                'basic' => [
+                    'project' => true,
+                    'team_management' => true,
+                    'analytics' => false,
+                ],
+
+                'pro' => [
+                    'project' => true,
+                    'team_management' => true,
+                    'analytics' => true,
+                ],
+
+                default => [],
+            };
+
             Plan::updateOrCreate(
                 [
                     'name' => $plan['name'],
@@ -31,6 +56,7 @@ class PlanSeeder extends Seeder
                 ],
                 [
                     'description' => $plan['description'],
+                    'features' => $features,
                     'pricing' => $plan['pricing'],
                     'duration' => $plan['duration'],
                     'stripe_price_id' => $plan['stripe_price_id'],

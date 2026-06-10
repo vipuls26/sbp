@@ -52,4 +52,44 @@ class User extends Authenticatable
         });
     }
 
+    // feature
+    public function hasFeature(string $feature): bool
+    {
+        $subscription = $this->subscriptions()
+            ->with('plan')
+            ->latest()
+            ->first();
+
+        if (! $subscription || ! $subscription->plan) {
+            return false;
+        }
+
+        return $subscription->plan->features[$feature] ?? false;
+    }
+
+    public function hasActiveSubscription(): bool
+    {
+        return $this->subscriptions()
+            ->where('status', 'active')
+            ->exists();
+    }
+
+    public function projectLimit(): int
+    {
+        $subscription = $this->subscriptions()
+            ->with('plan')
+            ->where('status', 'active')
+            ->latest()
+            ->first();
+
+        if (! $subscription || ! $subscription->plan) {
+            return 0;
+        }
+
+        return match (strtolower($subscription->plan->name)) {
+            'hobby' => 5,
+            'basic' => 20,
+            default => PHP_INT_MAX,
+        };
+    }
 }

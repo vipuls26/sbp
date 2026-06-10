@@ -128,6 +128,42 @@
                 @enderror
             </div>
 
+            {{-- stripe product id --}}
+            <div>
+                <label for="stripe_product_id" class="block text-sm font-medium text-slate-900">
+                    Stripe product id
+                </label>
+                <div class="mt-2">
+                    <div class="relative w-full">
+                        <i class="pi pi-box absolute left-3 top-3 text-slate-400"></i>
+                        <input id="stripe_product_id" type="text" name="stripe_product_id" value="{{ old('stripe_product_id') }}"
+                            placeholder="prod_123456789"
+                            class="block w-full rounded-xl border border-slate-200 bg-white
+                                        pl-10 pr-3 py-2.5 text-sm text-slate-900
+                                        placeholder:text-slate-400 focus:border-slate-400 focus:outline-none
+                                        focus:ring-2 focus:ring-slate-200" />
+                    </div>
+                </div>
+                @error('stripe_product_id')
+                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                @enderror
+            </div>
+
+            {{-- features --}}
+            <div>
+                <label class="block text-sm font-medium text-slate-900">Features</label>
+                <div class="mt-2 space-y-2">
+                    @foreach (['project' => 'Project', 'team_management' => 'Team Management', 'analytics' => 'Analytics'] as $key => $label)
+                        <label class="flex items-center gap-2 text-sm text-slate-700">
+                            <input type="checkbox" name="features[{{ $key }}]" value="1"
+                                {{ old('features.' . $key) ? 'checked' : '' }}
+                                class="rounded border-slate-300" />
+                            {{ $label }}
+                        </label>
+                    @endforeach
+                </div>
+            </div>
+
             {{-- button --}}
             <div>
                 <button type="submit"

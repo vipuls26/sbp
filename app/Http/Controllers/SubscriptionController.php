@@ -240,6 +240,18 @@ class SubscriptionController extends Controller
         }
     }
 
+    // show subscription details page
+    public function show()
+    {
+        $subscription = Auth::user()->subscriptions()
+            ->where('stripe_status', '!=', 'canceled')
+            ->with('plan')
+            ->latest()
+            ->first();
+
+        return view('user.subscription-show', compact('subscription'));
+    }
+
     // cancel subscription at the end of the billing cycle
     public function destroy()
     {
@@ -261,40 +273,12 @@ class SubscriptionController extends Controller
         }
 
         $this->subscriptionService->cancel(Auth::id(), [
-            'status' => 'cancelled',
-            'end_date' => $subscription->ends_at ?? $this->getStripePeriodEnd($subscription->asStripeSubscription()),
             'stripe_status' => $subscription->stripe_status,
             'stripe_id' => $subscription->stripe_id,
+            'end_date' => $subscription->ends_at ?? $this->getStripePeriodEnd($subscription->asStripeSubscription()),
         ]);
 
-        return redirect()->route('user.plans')->with('success', 'Subscription will end at the end of the billing period.');
-    }
-
-    // download invoice PDF for a payment
-    public function downloadInvoice(Payment $payment)
-    {
-        if ($payment->user_id !== Auth::id()) {
-            abort(403);
-        }
-
-        if (blank($payment->stripe_invoice_id)) {
-            return redirect()->route('user.plans')->with('error', 'Invoice is not available for this payment.');
-        }
-
-        try {
-            $filename = 'invoice-'.$payment->id.'.pdf';
-
-            return Auth::user()->downloadInvoice($payment->stripe_invoice_id, [], $filename);
-        } catch (\Throwable $e) {
-            Log::warning('Stripe invoice download failed.', [
-                'payment_id' => $payment->id,
-                'user_id' => Auth::id(),
-                'invoice_id' => $payment->stripe_invoice_id,
-                'message' => $e->getMessage(),
-            ]);
-
-            return redirect()->route('user.plans')->with('error', 'Invoice could not be downloaded.');
-        }
+        return redirect()->route('subscriptions.show')->with('success', 'Subscription will end at the end of the billing period.');
     }
 
     /**
@@ -309,5 +293,36 @@ class SubscriptionController extends Controller
         }
 
         return Carbon::createFromTimestamp($periodEnd)->toDateTimeString();
+    }
+
+
+    public function downloadInvoice()
+    {
+            $payment = Payment::where('user_id', auth()->id())
+                ->whereNotNull('stripe_invoice_id')
+                ->latest()
+                ->first();
+
+            if (! $payment) {
+                return redirect()->route('user.payment-history')->with('error', 'No invoice found to download.');
+            }
+
+            try {
+                $invoiceUrl = auth()->user()->stripe()->invoices->retrieve($payment->stripe_invoice_id)->hosted_invoice_url;
+
+                if (! $invoiceUrl) {
+                    return redirect()->route('user.payment-history')->with('error', 'Invoice URL not found.');
+                }
+
+                return redirect($invoiceUrl);
+            } catch (\Throwable $e) {
+                Log::warning('Stripe invoice could not be retrieved for download.', [
+                    'payment_id' => $payment->id,
+                    'stripe_invoice_id' => $payment->stripe_invoice_id,
+                    'message' => $e->getMessage(),
+                ]);
+
+                return redirect()->route('user.payment-history')->with('error', 'Invoice could not be retrieved for download.');
+            }
     }
 }

@@ -9,11 +9,17 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 
-#[Fillable(['name', 'description', 'pricing', 'duration', 'is_active', 'admin_id', 'stripe_price_id', 'stripe_product_id'])]
+#[Fillable(['name', 'description', 'pricing', 'features', 'duration', 'is_active', 'admin_id', 'stripe_price_id', 'stripe_product_id'])]
 class Plan extends Model
 {
     use SoftDeletes;
 
+    protected function casts(): array
+    {
+        return [
+            'features' => 'array',
+        ];
+    }
     // plan created by an admin user
     public function createdBy()
     {

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\CheckPlanAccess;
 use App\Http\Middleware\CheckRole;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -14,9 +15,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->alias(['role' => CheckRole::class]);
-        $middleware->validateCsrfTokens(except: [
-            'stripe/*',
+        $middleware->alias([
+            'role' => CheckRole::class,
+            'feature' => CheckPlanAccess::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

@@ -9,6 +9,18 @@ use Laravel\Cashier\Subscription as CashierSubscription;
 
 class Subscription extends CashierSubscription
 {
+
+    protected function casts(): array
+    {
+        return [
+            'start_date' => 'datetime',
+            'end_date' => 'datetime',
+            'ends_at' => 'datetime',
+            'trial_ends_at' => 'datetime',
+            'cancel_at_period_end' => 'boolean',
+        ];
+    }
+
     // subscription belongs to the subscriber in our app
     public function subscriber()
     {

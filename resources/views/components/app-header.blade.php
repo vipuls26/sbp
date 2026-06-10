@@ -16,10 +16,17 @@
 
             <nav class="hidden md:flex items-center space-x-6">
                 @foreach ($links as $link)
-                    <a href="{{ route($link['route']) }}"
-                        class="hover:text-red-500 {{ request()->routeIs($link['route']) ? 'font-bold text-red-500' : 'text-white' }}">
-                        {{ $link['label'] }}
-                    </a>
+                    @if (!empty($link['disabled']))
+                        <span class="flex items-center gap-1 cursor-not-allowed text-slate-600 select-none" title="Upgrade your plan to access this feature">
+                            <i class="pi pi-lock text-xs"></i>
+                            {{ $link['label'] }}
+                        </span>
+                    @else
+                        <a href="{{ route($link['route']) }}"
+                            class="hover:text-red-500 {{ request()->routeIs($link['route']) ? 'font-bold text-red-500' : 'text-white' }}">
+                            {{ $link['label'] }}
+                        </a>
+                    @endif
                 @endforeach
             </nav>
 
@@ -40,10 +47,17 @@
         <div id="mobileMenu" class="hidden md:hidden border-t border-gray-800 py-4">
             <div class="flex flex-col space-y-3">
                 @foreach ($links as $link)
-                    <a href="{{ route($link['route']) }}"
-                        class="{{ request()->routeIs($link['route']) ? 'text-red-500 font-bold' : 'text-white' }} hover:text-red-500">
-                        {{ $link['label'] }}
-                    </a>
+                    @if (!empty($link['disabled']))
+                        <span class="flex items-center gap-1 cursor-not-allowed text-slate-600 select-none">
+                            <i class="pi pi-lock text-xs"></i>
+                            {{ $link['label'] }}
+                        </span>
+                    @else
+                        <a href="{{ route($link['route']) }}"
+                            class="{{ request()->routeIs($link['route']) ? 'text-red-500 font-bold' : 'text-white' }} hover:text-red-500">
+                            {{ $link['label'] }}
+                        </a>
+                    @endif
                 @endforeach
 
                 <form action="{{ route('auth.logout') }}" method="POST">

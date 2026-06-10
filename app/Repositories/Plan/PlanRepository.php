@@ -14,12 +14,14 @@ class PlanRepository implements PlanRepositoryInterface
     {
         return Plan::create([
             'name' => $data['name'],
-            'description' => $data['description'],
+            'description' => $data['description'] ?? null,
             'pricing' => $data['pricing'],
             'duration' => $data['duration'],
+            'features' => $data['features'] ?? [],
             'stripe_price_id' => $data['stripe_price_id'],
             'stripe_product_id' => $data['stripe_product_id'] ?? null,
             'admin_id' => Auth::id(),
+            'is_active' => 'true',
         ]);
     }
 
@@ -53,10 +55,11 @@ class PlanRepository implements PlanRepositoryInterface
 
         $payload = [
             'name' => $data['name'],
-            'description' => $data['description'],
+            'description' => $data['description'] ?? null,
             'pricing' => $data['pricing'],
             'duration' => $data['duration'],
             'stripe_price_id' => $data['stripe_price_id'],
+            'features' => $data['features'] ?? [],
         ];
 
         // Keep the existing Stripe product id unless the caller sends a new one.

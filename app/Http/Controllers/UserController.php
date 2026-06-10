@@ -22,4 +22,10 @@ class UserController extends Controller
         $dashboard = $this->userService->dashboard();
         return view('user.plans', $dashboard);
     }
+
+    public function myPlan()
+    {
+        $myPlan = $this->userService->myPlan();
+        return view('user.my-plan', $myPlan);
+    }
 }

@@ -4,6 +4,7 @@ namespace App\Http\Requests\Plan;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class PlanAdd extends FormRequest
 {
@@ -23,11 +24,19 @@ class PlanAdd extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:50', 'unique:plans,name'],
+            'name' => [
+                'required',
+                'string',
+                'max:50',
+                Rule::unique('plans')->where(fn($q) => $q->where('duration', $this->duration)),
+            ],
             'description' => ['nullable', 'string'],
             'pricing' => ['required', 'numeric', 'min:0'],
             'duration' => ['required', 'in:monthly,annual'],
             'stripe_price_id' => ['required', 'string', 'max:255', 'unique:plans,stripe_price_id'],
+            'stripe_product_id' => ['nullable', 'string', 'max:255'],
+            'features' => ['nullable', 'array'],
+            'features.*' => ['boolean'],
             'is_active' => ['sometimes', 'boolean'],
         ];
     }
@@ -58,6 +67,9 @@ class PlanAdd extends FormRequest
             'stripe_price_id.string' => 'Stripe price id must be a string',
             'stripe_price_id.max' => 'Stripe price id may not be greater than 255 characters',
             'stripe_price_id.unique' => 'Stripe price id already exists',
+
+            // name unique per duration
+            'name.unique' => 'A plan with this name already exists for the selected duration',
         ];
     }
 }

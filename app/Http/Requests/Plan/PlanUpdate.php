@@ -57,6 +57,11 @@ class PlanUpdate extends FormRequest
                 'max:255',
                 Rule::unique('plans', 'stripe_price_id')->ignore($plan->id),
             ],
+
+            'stripe_product_id' => ['nullable', 'string', 'max:255'],
+
+            'features' => ['nullable', 'array'],
+            'features.*' => ['boolean'],
         ];
     }
 
